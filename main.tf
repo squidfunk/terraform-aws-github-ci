@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Martin Donath <martin.donath@squidfunk.com>
+# Copyright (c) 2017 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -41,8 +41,8 @@ data "aws_region" "_" {
 # Data: IAM
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.codebuild_assume_role_policy.json
-data "aws_iam_policy_document" "codebuild_assume_role_policy" {
+# data.aws_iam_policy_document.codebuild_assume_role.json
+data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
     actions = [
       "sts:AssumeRole",
@@ -58,8 +58,8 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
   }
 }
 
-# data.aws_iam_policy_document.codebuild_policy.json                            # TODO: fix s3 policy (here and in codepipeline)
-data "aws_iam_policy_document" "codebuild_policy" {
+# data.aws_iam_policy_document.codebuild.json
+data "aws_iam_policy_document" "codebuild" {
   statement {
     actions = [
       "logs:CreateLogGroup",
@@ -74,20 +74,20 @@ data "aws_iam_policy_document" "codebuild_policy" {
 
   statement {
     actions = [
-      "s3:*",
+      "s3:PutObject",
     ]
 
     resources = [
-      "${aws_s3_bucket._.arn}",
-      "${aws_s3_bucket._.arn}/*",
+      "${aws_s3_bucket.codepipeline.arn}",
+      "${aws_s3_bucket.codepipeline.arn}/*",
     ]
   }
 }
 
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.codepipeline_assume_role_policy.json
-data "aws_iam_policy_document" "codepipeline_assume_role_policy" {
+# data.aws_iam_policy_document.codepipeline_assume_role.json
+data "aws_iam_policy_document" "codepipeline_assume_role" {
   statement {
     actions = [
       "sts:AssumeRole",
@@ -103,8 +103,8 @@ data "aws_iam_policy_document" "codepipeline_assume_role_policy" {
   }
 }
 
-# data.aws_iam_policy_document.codepipeline_policy.json
-data "aws_iam_policy_document" "codepipeline_policy" {
+# data.aws_iam_policy_document.codepipeline.json
+data "aws_iam_policy_document" "codepipeline" {
   statement {
     actions = [
       "codebuild:BatchGetBuilds",
@@ -118,20 +118,20 @@ data "aws_iam_policy_document" "codepipeline_policy" {
 
   statement {
     actions = [
-      "s3:*",
+      "s3:PutObject",
     ]
 
     resources = [
-      "${aws_s3_bucket._.arn}",
-      "${aws_s3_bucket._.arn}/*",
+      "${aws_s3_bucket.codepipeline.arn}",
+      "${aws_s3_bucket.codepipeline.arn}/*",
     ]
   }
 }
 
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.codepipeline_manager_assume_role_policy.json
-data "aws_iam_policy_document" "codepipeline_manager_assume_role_policy" {
+# data.aws_iam_policy_document.codepipeline_manager_assume_role.json
+data "aws_iam_policy_document" "codepipeline_manager_assume_role" {
   statement {
     actions = [
       "sts:AssumeRole",
@@ -147,8 +147,8 @@ data "aws_iam_policy_document" "codepipeline_manager_assume_role_policy" {
   }
 }
 
-# data.aws_iam_policy_document.codepipeline_manager_policy.json
-data "aws_iam_policy_document" "codepipeline_manager_policy" {
+# data.aws_iam_policy_document.codepipeline_manager.json
+data "aws_iam_policy_document" "codepipeline_manager" {
   statement {
     actions = [
       "codepipeline:CreatePipeline",
@@ -179,15 +179,15 @@ data "aws_iam_policy_document" "codepipeline_manager_policy" {
 
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.codepipeline_webhook_policy.json
-data "aws_iam_policy_document" "codepipeline_webhook_policy" {
+# data.aws_iam_policy_document.github_webhook.json
+data "aws_iam_policy_document" "github_webhook" {
   statement {
     actions = [
       "sns:Publish",
     ]
 
     resources = [
-      "${aws_sns_topic.codepipeline_webhook_topic.arn}",
+      "${aws_sns_topic.github_webhook.arn}",
     ]
   }
 }
@@ -196,114 +196,114 @@ data "aws_iam_policy_document" "codepipeline_webhook_policy" {
 # Resources: IAM
 # -----------------------------------------------------------------------------
 
-# aws_iam_role.codebuild_role
-resource "aws_iam_role" "codebuild_role" {
+# aws_iam_role.codebuild
+resource "aws_iam_role" "codebuild" {
   name = "CodeBuild"
   path = "/codebuild/"
 
   assume_role_policy = "${
-    data.aws_iam_policy_document.codebuild_assume_role_policy.json
+    data.aws_iam_policy_document.codebuild_assume_role.json
   }"
 }
 
-# aws_iam_policy.codebuild_policy
-resource "aws_iam_policy" "codebuild_policy" {
-  name = "CodeBuildPolicy"
+# aws_iam_policy.codebuild
+resource "aws_iam_policy" "codebuild" {
+  name = "CodeBuild"
   path = "/codebuild/"
 
   policy = "${
-    data.aws_iam_policy_document.codebuild_policy.json
+    data.aws_iam_policy_document.codebuild.json
   }"
 }
 
-# aws_iam_policy_attachment.codebuild_policy_attachment
-resource "aws_iam_policy_attachment" "codebuild_policy_attachment" {
-  name = "CodeBuildPolicyAttachment"
+# aws_iam_policy_attachment.codebuild
+resource "aws_iam_policy_attachment" "codebuild" {
+  name = "CodeBuild"
 
-  policy_arn = "${aws_iam_policy.codebuild_policy.arn}"
-  roles      = ["${aws_iam_role.codebuild_role.id}"]
+  policy_arn = "${aws_iam_policy.codebuild.arn}"
+  roles      = ["${aws_iam_role.codebuild.id}"]
 }
 
 # -----------------------------------------------------------------------------
 
-# aws_iam_role.codepipeline_role
-resource "aws_iam_role" "codepipeline_role" {
+# aws_iam_role.codepipeline
+resource "aws_iam_role" "codepipeline" {
   name = "CodePipeline"
   path = "/codepipeline/"
 
   assume_role_policy = "${
-    data.aws_iam_policy_document.codepipeline_assume_role_policy.json
+    data.aws_iam_policy_document.codepipeline_assume_role.json
   }"
 }
 
-# aws_iam_policy.codepipeline_policy
-resource "aws_iam_policy" "codepipeline_policy" {
-  name = "CodePipelinePolicy"
+# aws_iam_policy.codepipeline
+resource "aws_iam_policy" "codepipeline" {
+  name = "CodePipeline"
   path = "/codepipeline/"
 
   policy = "${
-    data.aws_iam_policy_document.codepipeline_policy.json
+    data.aws_iam_policy_document.codepipeline.json
   }"
 }
 
-# aws_iam_policy_attachment.codepipeline_policy_attachment
-resource "aws_iam_policy_attachment" "codepipeline_policy_attachment" {
-  name = "CodePipelinePolicyAttachment"
+# aws_iam_policy_attachment.codepipeline
+resource "aws_iam_policy_attachment" "codepipeline" {
+  name = "CodePipeline"
 
-  policy_arn = "${aws_iam_policy.codepipeline_policy.arn}"
-  roles      = ["${aws_iam_role.codepipeline_role.id}"]
+  policy_arn = "${aws_iam_policy.codepipeline.arn}"
+  roles      = ["${aws_iam_role.codepipeline.id}"]
 }
 
 # -----------------------------------------------------------------------------
 
-# aws_iam_role.codepipeline_manager_role
-resource "aws_iam_role" "codepipeline_manager_role" {
+# aws_iam_role.codepipeline_manager
+resource "aws_iam_role" "codepipeline_manager" {
   name = "CodePipelineManager"
   path = "/codepipeline/"
 
   assume_role_policy = "${
-    data.aws_iam_policy_document.codepipeline_manager_assume_role_policy.json
+    data.aws_iam_policy_document.codepipeline_manager_assume_role.json
   }"
 }
 
-# aws_iam_policy.codepipeline_manager_policy
-resource "aws_iam_policy" "codepipeline_manager_policy" {
-  name = "CodePipelineManagerPolicy"
+# aws_iam_policy.codepipeline_manager
+resource "aws_iam_policy" "codepipeline_manager" {
+  name = "CodePipelineManager"
   path = "/codepipeline/"
 
   policy = "${
-    data.aws_iam_policy_document.codepipeline_manager_policy.json
+    data.aws_iam_policy_document.codepipeline_manager.json
   }"
 }
 
-# aws_iam_policy_attachment.codepipeline_manager_policy_attachment
-resource "aws_iam_policy_attachment" "codepipeline_manager_policy_attachment" {
-  name = "CodePipelineManagerPolicyAttachment"
+# aws_iam_policy_attachment.codepipeline_manager
+resource "aws_iam_policy_attachment" "codepipeline_manager" {
+  name = "CodePipelineManager"
 
-  policy_arn = "${aws_iam_policy.codepipeline_manager_policy.arn}"
-  roles      = ["${aws_iam_role.codepipeline_manager_role.id}"]
+  policy_arn = "${aws_iam_policy.codepipeline_manager.arn}"
+  roles      = ["${aws_iam_role.codepipeline_manager.id}"]
 }
 
 # -----------------------------------------------------------------------------
 
-# aws_iam_user.codepipeline_webhook_user
-resource "aws_iam_user" "codepipeline_webhook_user" {
-  name = "CodePipelineWebhook"
+# aws_iam_user.github_webhook
+resource "aws_iam_user" "github_webhook" {
+  name = "${var.name}GitHubWebhook"
   path = "/codepipeline/"
 }
 
-# aws_iam_access_key.codepipeline_webhook_access_key
-resource "aws_iam_access_key" "codepipeline_webhook_access_key" {
-  user = "${aws_iam_user.codepipeline_webhook_user.name}"
+# aws_iam_access_key.github_webhook
+resource "aws_iam_access_key" "github_webhook" {
+  user = "${aws_iam_user.github_webhook.name}"
 }
 
-# aws_iam_user_policy.codepipeline_webhook_policy
-resource "aws_iam_user_policy" "codepipeline_webhook_policy" {
-  name = "CodePipelineWebhookPolicy"
-  user = "${aws_iam_user.codepipeline_webhook_user.name}"
+# aws_iam_user_policy.github_webhook
+resource "aws_iam_user_policy" "github_webhook" {
+  name = "${var.name}GitHubWebhook"
+  user = "${aws_iam_user.github_webhook.name}"
 
   policy = "${
-    data.aws_iam_policy_document.codepipeline_webhook_policy.json
+    data.aws_iam_policy_document.github_webhook.json
   }"
 }
 
@@ -311,8 +311,8 @@ resource "aws_iam_user_policy" "codepipeline_webhook_policy" {
 # Resources: S3
 # -----------------------------------------------------------------------------
 
-# aws_s3_bucket._
-resource "aws_s3_bucket" "_" {
+# aws_s3_bucket.codepipeline
+resource "aws_s3_bucket" "codepipeline" {
   bucket = "${var.codepipeline_artifacts_bucket}"
   acl    = "private"
 }
@@ -321,12 +321,12 @@ resource "aws_s3_bucket" "_" {
 # Resources: CodeBuild
 # -----------------------------------------------------------------------------
 
-# aws_codebuild_project._
-resource "aws_codebuild_project" "_" {
-  name = "${var.github_repository}"
+# aws_codebuild_project.codebuild
+resource "aws_codebuild_project" "codebuild" {
+  name = "${var.name}"
 
   build_timeout = "5"
-  service_role  = "${aws_iam_role.codebuild_role.arn}"
+  service_role  = "${aws_iam_role.codebuild.arn}"
 
   source {
     type = "CODEPIPELINE"
@@ -347,15 +347,15 @@ resource "aws_codebuild_project" "_" {
 # Resources: CodePipeline
 # -----------------------------------------------------------------------------
 
-# aws_codepipeline._
-resource "aws_codepipeline" "_" {
-  name = "${var.github_repository}"
+# aws_codepipeline.codepipeline
+resource "aws_codepipeline" "codepipeline" {
+  name = "${var.name}"
 
-  role_arn = "${aws_iam_role.codepipeline_role.arn}"
+  role_arn = "${aws_iam_role.codepipeline.arn}"
 
   artifact_store {
     type     = "S3"
-    location = "${aws_s3_bucket._.bucket}"
+    location = "${aws_s3_bucket.codepipeline.bucket}"
   }
 
   stage {
@@ -393,54 +393,67 @@ resource "aws_codepipeline" "_" {
       output_artifacts = ["artifacts"]
 
       configuration {
-        ProjectName = "${aws_codebuild_project._.name}"
+        ProjectName = "${var.name}"
       }
     }
   }
+}
 
-  # stage {
-  #   name = "Deploy"
-  #
-  #   action {
-  #     name     = "Deploy"
-  #     category = "Invoke"
-  #     owner    = "AWS"
-  #     provider = "Lambda"
-  #
-  #     input_artifacts = [
-  #       "source",
-  #     ]
-  #
-  #     configuration {
-  #       FunctionName = "index.handler"
-  #
-  #       // Upload release to S3 as zip file,
-  #       // Then register deployment bucket
-  #
-  #       // TODO: we should upload results to S3
-  #       // and then run a ginseng-analytics deploy action.
-  #     }
-  #   }
-  # }
+# -----------------------------------------------------------------------------
+# Resources: SNS
+# -----------------------------------------------------------------------------
+
+# aws_sns_topic.github_webhook
+resource "aws_sns_topic" "github_webhook" {
+  name         = "github-webhook-${var.github_repository}"
+  display_name = "${var.name}GitHubWebhook"
+}
+
+# aws_sns_topic_subscription.github_webhook
+resource "aws_sns_topic_subscription" "github_webhook" {
+  topic_arn = "${aws_sns_topic.github_webhook.arn}"
+  protocol  = "lambda"
+  endpoint  = "${aws_lambda_function.github_webhook.arn}"
+}
+
+# -----------------------------------------------------------------------------
+# Resources: Lambda
+# -----------------------------------------------------------------------------
+
+# aws_lambda_function.github_webhook
+resource "aws_lambda_function" "github_webhook" {
+  function_name    = "${var.name}GitHubWebhook"
+  role             = "${aws_iam_role.codepipeline_manager.arn}"
+  runtime          = "nodejs6.10"
+  filename         = "${path.module}/index.zip"
+  source_code_hash = "${base64sha256(file("${path.module}/index.zip"))}"
+  handler          = "index.default"
+}
+
+# aws_lambda_permission.github_webhook
+resource "aws_lambda_permission" "github_webhook" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.github_webhook.arn}"
+  principal     = "sns.amazonaws.com"
+  source_arn    = "${aws_sns_topic.github_webhook.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: GitHub
 # -----------------------------------------------------------------------------
 
-# github_repository_webhook._
-resource "github_repository_webhook" "_" {
+# github_repository_webhook.github_webhook
+resource "github_repository_webhook" "github_webhook" {
   repository = "${var.github_repository}"
   name       = "amazonsns"
 
   configuration {
-    aws_key    = "${aws_iam_access_key.codepipeline_webhook_access_key.id}"
-    aws_secret = "${aws_iam_access_key.codepipeline_webhook_access_key.secret}"
-    sns_topic  = "${aws_sns_topic.codepipeline_webhook_topic.arn}"
+    aws_key    = "${aws_iam_access_key.github_webhook.id}"
+    aws_secret = "${aws_iam_access_key.github_webhook.secret}"
+    sns_topic  = "${aws_sns_topic.github_webhook.arn}"
     sns_region = "${data.aws_region._.name}"
   }
-
-  active = false
 
   events = ["push", "pull_request"]
 }

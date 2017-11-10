@@ -20,6 +20,23 @@
 
 provider "aws" {}
 
+provider "github" {
+  token        = "${var.github_oauth_token}"
+  organization = "${var.github_organization}"
+}
+
+# -----------------------------------------------------------------------------
+# Data: Credentials
+# -----------------------------------------------------------------------------
+
+# data.aws_caller_identity._
+data "aws_caller_identity" "_" {}
+
+# data.aws_region._
+data "aws_region" "_" {
+  current = true
+}
+
 # -----------------------------------------------------------------------------
 # Data: IAM
 # -----------------------------------------------------------------------------
@@ -161,6 +178,21 @@ data "aws_iam_policy_document" "codepipeline_manager_policy" {
 }
 
 # -----------------------------------------------------------------------------
+
+# data.aws_iam_policy_document.codepipeline_webhook_policy.json
+data "aws_iam_policy_document" "codepipeline_webhook_policy" {
+  statement {
+    actions = [
+      "sns:Publish",
+    ]
+
+    resources = [
+      "${aws_sns_topic.codepipeline_webhook_topic.arn}",
+    ]
+  }
+}
+
+# -----------------------------------------------------------------------------
 # Resources: IAM
 # -----------------------------------------------------------------------------
 
@@ -253,12 +285,35 @@ resource "aws_iam_policy_attachment" "codepipeline_manager_policy_attachment" {
 }
 
 # -----------------------------------------------------------------------------
+
+# aws_iam_user.codepipeline_webhook_user
+resource "aws_iam_user" "codepipeline_webhook_user" {
+  name = "CodePipelineWebhook"
+  path = "/codepipeline/"
+}
+
+# aws_iam_access_key.codepipeline_webhook_access_key
+resource "aws_iam_access_key" "codepipeline_webhook_access_key" {
+  user = "${aws_iam_user.codepipeline_webhook_user.name}"
+}
+
+# aws_iam_user_policy.codepipeline_webhook_policy
+resource "aws_iam_user_policy" "codepipeline_webhook_policy" {
+  name = "CodePipelineWebhookPolicy"
+  user = "${aws_iam_user.codepipeline_webhook_user.name}"
+
+  policy = "${
+    data.aws_iam_policy_document.codepipeline_webhook_policy.json
+  }"
+}
+
+# -----------------------------------------------------------------------------
 # Resources: S3
 # -----------------------------------------------------------------------------
 
 # aws_s3_bucket._
 resource "aws_s3_bucket" "_" {
-  bucket = "${var.codepipeline_store_bucket}"
+  bucket = "${var.codepipeline_artifacts_bucket}"
   acl    = "private"
 }
 
@@ -367,4 +422,25 @@ resource "aws_codepipeline" "_" {
   #     }
   #   }
   # }
+}
+
+# -----------------------------------------------------------------------------
+# Resources: GitHub
+# -----------------------------------------------------------------------------
+
+# github_repository_webhook._
+resource "github_repository_webhook" "_" {
+  repository = "${var.github_repository}"
+  name       = "amazonsns"
+
+  configuration {
+    aws_key    = "${aws_iam_access_key.codepipeline_webhook_access_key.id}"
+    aws_secret = "${aws_iam_access_key.codepipeline_webhook_access_key.secret}"
+    sns_topic  = "${aws_sns_topic.codepipeline_webhook_topic.arn}"
+    sns_region = "${data.aws_region._.name}"
+  }
+
+  active = false
+
+  events = ["push", "pull_request"]
 }

@@ -57,7 +57,7 @@ variable "codebuild_image" {
 # Variables: CodePipeline
 # -----------------------------------------------------------------------------
 
-# var.codepipeline_store_bucket
-variable "codepipeline_store_bucket" {
+# var.codepipeline_artifacts_bucket
+variable "codepipeline_artifacts_bucket" {
   description = "S3 bucket to store build artifacts"
 }

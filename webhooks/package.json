@@ -1,0 +1,56 @@
+{
+  "name": "terraform-aws-github-ci",
+  "version": "0.0.0",
+  "description": "AWS CodePipeline with GitHub webhook integration",
+  "keywords": [
+    "aws",
+    "codepipeline",
+    "github",
+    "terraform",
+    "webhook"
+  ],
+  "homepage": "https://github.com/squidfunk/terraform-aws-github-ci/",
+  "bugs": {
+    "url": "https://github.com/squidfunk/terraform-aws-github-ci/",
+    "email": "martin.donath@squidfunk.com"
+  },
+  "private": true,
+  "author": {
+    "name": "Martin Donath",
+    "email": "martin.donath@squidfunk.com"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/squidfunk/terraform-aws-github-ci.git"
+  },
+  "scripts": {
+    "build": "make build",
+    "clean": "make clean",
+    "lint": "make lint",
+    "test": "make test",
+    "watch": "make watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "archiver": "^2.1.0",
+    "aws-sdk": "^2.137.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-plugin-root-import": "^5.1.0",
+    "babel-preset-env": "^1.6.0",
+    "cross-env": "^5.0.5",
+    "eslint": "^4.8.0",
+    "eslint-plugin-jasmine": "^2.9.1",
+    "event-hooks-webpack-plugin": "^1.0.0",
+    "jasmine": "^2.8.0",
+    "jasmine-spec-reporter": "^4.2.1",
+    "nodemon": "^1.12.1",
+    "nyc": "^11.3.0",
+    "webpack": "^3.8.1",
+    "webpack-node-externals": "^1.6.0"
+  }
+}

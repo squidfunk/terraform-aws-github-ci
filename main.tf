@@ -153,14 +153,21 @@ data "aws_iam_policy_document" "codepipeline_manager" {
     actions = [
       "codepipeline:CreatePipeline",
       "codepipeline:DeletePipeline",
-      "codepipeline:GetPipelineState",
-      "codepipeline:ListPipelines",
       "codepipeline:GetPipeline",
-      "codepipeline:UpdatePipeline",
     ]
 
     resources = [
       "*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:PassRole",
+    ]
+
+    resources = [
+      "${aws_iam_role.codepipeline.arn}",
     ]
   }
 
@@ -417,17 +424,38 @@ resource "aws_sns_topic_subscription" "github_webhook" {
 }
 
 # -----------------------------------------------------------------------------
+# Resources: Distribution files
+# -----------------------------------------------------------------------------
+
+# null_resource._
+resource "null_resource" "github_webhook" {
+  provisioner "local-exec" {
+    command = "make -C webhooks build"
+  }
+}
+
+# -----------------------------------------------------------------------------
 # Resources: Lambda
 # -----------------------------------------------------------------------------
 
 # aws_lambda_function.github_webhook
 resource "aws_lambda_function" "github_webhook" {
-  function_name    = "${var.name}GitHubWebhook"
-  role             = "${aws_iam_role.codepipeline_manager.arn}"
-  runtime          = "nodejs6.10"
-  filename         = "${path.module}/index.zip"
-  source_code_hash = "${base64sha256(file("${path.module}/index.zip"))}"
-  handler          = "index.default"
+  function_name = "github-webhook-${var.github_repository}"
+  role          = "${aws_iam_role.codepipeline_manager.arn}"
+  runtime       = "nodejs6.10"
+  filename      = "${path.module}/webhooks/dist/push.zip"
+  handler       = "index.default"
+
+  source_code_hash = "${
+    base64sha256(file("${path.module}/webhooks/dist/push.zip"))
+  }"
+
+  environment {
+    variables = {
+      CODEPIPELINE_NAME  = "${var.name}"
+      GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
+    }
+  }
 }
 
 # aws_lambda_permission.github_webhook

@@ -57,7 +57,8 @@ module.exports = {
 
   /* Entrypoints */
   entry: {
-    push: path.resolve(__dirname, "src/push.js")
+    push:   path.resolve(__dirname, "src/push.js"),
+    status: path.resolve(__dirname, "src/status.js")
   },
 
   /* Loaders */

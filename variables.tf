@@ -38,6 +38,12 @@ variable "github_repository" {
   description = "GitHub repository name"
 }
 
+# var.github_bot_name
+variable "github_bot_name" {
+  description = "GitHub commit status bot name"
+  default     = "AWS CodePipeline"
+}
+
 # -----------------------------------------------------------------------------
 # Variables: CodeBuild
 # -----------------------------------------------------------------------------

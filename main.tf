@@ -154,6 +154,7 @@ data "aws_iam_policy_document" "codepipeline_manager" {
       "codepipeline:CreatePipeline",
       "codepipeline:DeletePipeline",
       "codepipeline:GetPipeline",
+      "codepipeline:GetPipelineExecution",
       "codepipeline:StartPipelineExecution",
     ]
 
@@ -187,15 +188,15 @@ data "aws_iam_policy_document" "codepipeline_manager" {
 
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.github_webhook.json
-data "aws_iam_policy_document" "github_webhook" {
+# data.aws_iam_policy_document.github.json
+data "aws_iam_policy_document" "github" {
   statement {
     actions = [
       "sns:Publish",
     ]
 
     resources = [
-      "${aws_sns_topic.github_webhook.arn}",
+      "${aws_sns_topic.github.arn}",
     ]
   }
 }
@@ -294,24 +295,24 @@ resource "aws_iam_policy_attachment" "codepipeline_manager" {
 
 # -----------------------------------------------------------------------------
 
-# aws_iam_user.github_webhook
-resource "aws_iam_user" "github_webhook" {
+# aws_iam_user.github
+resource "aws_iam_user" "github" {
   name = "github-ci-webhook-${var.github_repository}"
   path = "/github-ci/codepipeline/"
 }
 
-# aws_iam_access_key.github_webhook
-resource "aws_iam_access_key" "github_webhook" {
-  user = "${aws_iam_user.github_webhook.name}"
+# aws_iam_access_key.github
+resource "aws_iam_access_key" "github" {
+  user = "${aws_iam_user.github.name}"
 }
 
-# aws_iam_user_policy.github_webhook
-resource "aws_iam_user_policy" "github_webhook" {
+# aws_iam_user_policy.github
+resource "aws_iam_user_policy" "github" {
   name = "github-ci-webhook-${var.github_repository}"
-  user = "${aws_iam_user.github_webhook.name}"
+  user = "${aws_iam_user.github.name}"
 
   policy = "${
-    data.aws_iam_policy_document.github_webhook.json
+    data.aws_iam_policy_document.github.json
   }"
 }
 
@@ -413,24 +414,54 @@ resource "aws_codepipeline" "codepipeline" {
 # Resources: SNS
 # -----------------------------------------------------------------------------
 
-# aws_sns_topic.github_webhook
-resource "aws_sns_topic" "github_webhook" {
+# aws_sns_topic.github
+resource "aws_sns_topic" "github" {
   name = "github-ci-webhook-${var.github_repository}"
 }
 
-# aws_sns_topic_subscription.github_webhook
-resource "aws_sns_topic_subscription" "github_webhook" {
-  topic_arn = "${aws_sns_topic.github_webhook.arn}"
+# aws_sns_topic_subscription.github
+resource "aws_sns_topic_subscription" "github" {
+  topic_arn = "${aws_sns_topic.github.arn}"
   protocol  = "lambda"
-  endpoint  = "${aws_lambda_function.github_webhook.arn}"
+  endpoint  = "${aws_lambda_function.github_push.arn}"
+}
+
+# -----------------------------------------------------------------------------
+# Resources: CloudWatch
+# -----------------------------------------------------------------------------
+
+# aws_cloudwatch_event_rule.github_status
+resource "aws_cloudwatch_event_rule" "github_status" {
+  name = "github-ci-webhook-${var.github_repository}"
+
+  event_pattern = <<PATTERN
+{
+  "source": [
+    "aws.codepipeline"
+  ],
+  "detail-type": [
+    "CodePipeline Pipeline Execution State Change"
+  ]
+}
+PATTERN
+}
+
+# "detail": {
+#   "pipeline": "${aws_codepipeline.codepipeline.name}"
+# }
+
+# aws_cloudwatch_event_target.github_status
+resource "aws_cloudwatch_event_target" "github_status" {
+  rule = "${aws_cloudwatch_event_rule.github_status.name}"
+  arn  = "${aws_lambda_function.github_status.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: Lambda
 # -----------------------------------------------------------------------------
 
-# aws_lambda_function.github_webhook
-resource "aws_lambda_function" "github_webhook" {
+# aws_lambda_function.github_push
+resource "aws_lambda_function" "github_push" {
   function_name = "github-ci-webhook-${var.github_repository}-push"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
@@ -449,28 +480,61 @@ resource "aws_lambda_function" "github_webhook" {
   }
 }
 
-# aws_lambda_permission.github_webhook
-resource "aws_lambda_permission" "github_webhook" {
+# aws_lambda_permission.github_push
+resource "aws_lambda_permission" "github_push" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.github_webhook.arn}"
+  function_name = "${aws_lambda_function.github_push.arn}"
   principal     = "sns.amazonaws.com"
-  source_arn    = "${aws_sns_topic.github_webhook.arn}"
+  source_arn    = "${aws_sns_topic.github.arn}"
+}
+
+# -----------------------------------------------------------------------------
+
+# aws_lambda_function.github_status
+resource "aws_lambda_function" "github_status" {
+  function_name = "github-ci-webhook-${var.github_repository}-status"
+  role          = "${aws_iam_role.codepipeline_manager.arn}"
+  runtime       = "nodejs6.10"
+  filename      = "${path.module}/webhooks/dist/status.zip"
+  handler       = "index.default"
+
+  source_code_hash = "${
+    base64sha256(file("${path.module}/webhooks/dist/status.zip"))
+  }"
+
+  environment {
+    variables = {
+      GITHUB_OAUTH_TOKEN  = "${var.github_oauth_token}"
+      GITHUB_ORGANIZATION = "${var.github_organization}"
+      GITHUB_REPOSITORY   = "${var.github_repository}"
+      GITHUB_BOT_NAME     = "${var.github_bot_name}"
+    }
+  }
+}
+
+# aws_lambda_permission.github_status
+resource "aws_lambda_permission" "github_status" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.github_status.arn}"
+  principal     = "events.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_event_rule.github_status.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: GitHub
 # -----------------------------------------------------------------------------
 
-# github_repository_webhook.github_webhook
-resource "github_repository_webhook" "github_webhook" {
+# github_repository_webhook.github
+resource "github_repository_webhook" "github" {
   repository = "${var.github_repository}"
   name       = "amazonsns"
 
   configuration {
-    aws_key    = "${aws_iam_access_key.github_webhook.id}"
-    aws_secret = "${aws_iam_access_key.github_webhook.secret}"
-    sns_topic  = "${aws_sns_topic.github_webhook.arn}"
+    aws_key    = "${aws_iam_access_key.github.id}"
+    aws_secret = "${aws_iam_access_key.github.secret}"
+    sns_topic  = "${aws_sns_topic.github.arn}"
     sns_region = "${data.aws_region._.name}"
   }
 

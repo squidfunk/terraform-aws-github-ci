@@ -131,6 +131,6 @@ export default (event, context, cb) => {
     /* The event was processed */
     .then(data => cb(null, data))
 
-    /* An Error occurred */
+    /* An error occurred */
     .catch(cb)
 }

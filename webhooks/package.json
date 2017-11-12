@@ -31,7 +31,9 @@
     "test": "make test",
     "watch": "make watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "github": "^12.0.1"
+  },
   "devDependencies": {
     "archiver": "^2.1.0",
     "aws-sdk": "^2.137.0",

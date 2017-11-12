@@ -33,7 +33,7 @@ node_modules:
 # -----------------------------------------------------------------------------
 
 # Build library for distribution
-dist: $(shell find src)
+dist: $(shell find src) .babelrc webpack.config.js
 	$(shell npm bin)/cross-env NODE_ENV=production \
 		$(shell npm bin)/webpack
 

@@ -28,6 +28,27 @@ const path = require("path")
 const EventHooksPlugin = require("event-hooks-webpack-plugin")
 
 /* ----------------------------------------------------------------------------
+ * Functions
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Resolve module dependencies recursively
+ *
+ * @param {string} module - Module path
+ *
+ * @return {Array<string>} Paths of dependent modules
+ */
+const resolve = module => {
+  const package = require(path.resolve(module, "package.json"))
+  return Object.keys(package.dependencies).reduce((dependencies, name) => {
+    const dependency = fs.existsSync(path.resolve(module, "node_modules", name))
+      ? path.resolve(module, "node_modules", name)
+      : path.resolve(__dirname, "node_modules", name)
+    return [...dependencies, dependency, ...resolve(dependency)]
+  }, [])
+}
+
+/* ----------------------------------------------------------------------------
  * Configuration
  * ------------------------------------------------------------------------- */
 
@@ -82,9 +103,14 @@ module.exports = {
                   const external = path.resolve(
                     __dirname, "node_modules", dependency.request)
                   if (fs.existsSync(external)) {
-                    console.log(dependency.request)
                     archive.directory(external,
                       path.join("node_modules", dependency.request))
+
+                    /* Bundle nested dependencies */
+                    resolve(external).map(subexternal => {
+                      archive.directory(subexternal,
+                        path.relative(__dirname, subexternal))
+                    })
                   }
                 }
               })

@@ -19,15 +19,6 @@
 # IN THE SOFTWARE.
 
 # -----------------------------------------------------------------------------
-# Variables: General
-# -----------------------------------------------------------------------------
-
-# var.name
-variable "name" {
-  description = "Project name (in titlecase)"
-}
-
-# -----------------------------------------------------------------------------
 # Variables: GitHub
 # -----------------------------------------------------------------------------
 
@@ -60,6 +51,7 @@ variable "codebuild_compute_type" {
 # var.codebuild_image
 variable "codebuild_image" {
   description = "Base image for provisioning"
+  default     = "aws/codebuild/ubuntu-base:14.04"
 }
 
 # -----------------------------------------------------------------------------

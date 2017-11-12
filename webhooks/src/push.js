@@ -38,7 +38,7 @@ const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
  * ------------------------------------------------------------------------- */
 
 /**
- * Clone pipeline master for pull requests and execute on push events
+ * Clone pipeline master for pull requests
  *
  * @param {Object} event - Event
  * @param {Object} context - Context
@@ -46,31 +46,31 @@ const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
  */
 export default (event, context, cb) => {
   new Promise((resolve, reject) => {
-    for (const record of event.Records) {
-      const type = record.Sns.MessageAttributes["X-Github-Event"].Value
+    manager.getPipeline({
+      name: process.env.CODEPIPELINE_NAME
+    }, (err, master) => {
+      return err
+        ? reject(err)
+        : resolve(master.pipeline)
+    })
+  })
 
-      /* Event for pull request */
-      if (type === "pull_request") {
-        const message = JSON.parse(record.Sns.Message)                          // TODO: restructure, always parse message!
+    /* Process events sequentially */
+    .then(master => {
+      event.Records.reduce((promise, record) => {
+        return promise.then(() => {
+          const type = record.Sns.MessageAttributes["X-Github-Event"].Value
+          const message = JSON.parse(record.Sns.Message)
 
-        /* Retrieve pipeline master */
-        return new Promise((resolveMaster, rejectMaster) => {
-          manager.getPipeline({
-            name: process.env.CODEPIPELINE_NAME
-          }, (err, master) => {
-            return err
-              ? rejectMaster(err)
-              : resolveMaster(master.pipeline)
-          })
-        })
-
-          /* Create and retrieve pipeline for pull request */
-          .then(master => {
-            const name = `${master.name}.PR-${message.number}`
-            return new Promise((resolveBranch, rejectBranch) => {
+          /* Pull request event */
+          if (type === "pull_request") {
+            const name = `${master.name}.${
+              message.pull_request.head.ref.replace(/\W/g, "-")
+            }`
+            return new Promise((resolve, reject) => {
               manager.getPipeline({ name }, (err, branch) => {
                 if (branch)
-                  return resolveBranch(branch.pipeline)
+                  return resolve(branch.pipeline)
 
                 /* Adjust params to clone pipeline master */
                 master.stages[0].actions[0].configuration.Branch =
@@ -84,51 +84,52 @@ export default (event, context, cb) => {
                   pipeline: master
                 }, (cloneErr, cloned) => {
                   return cloneErr
-                    ? rejectBranch(cloneErr)
-                    : resolveBranch(cloned.pipeline)
+                    ? reject(cloneErr)
+                    : resolve(cloned.pipeline)
                 })
               })
             })
-          })
 
-          /* Handle pull request state */
-          .then(pipeline => {
-            return new Promise((resolveAction, rejectAction) => {
-              const action = message.pull_request.state === "closed"
-                ? "deletePipeline"
-                : "startPipelineExecution"
-              manager[action]({
-                name: pipeline.name
-              }, actionErr => {
-                return actionErr
-                  ? rejectAction(actionErr)
-                  : resolveAction()
+              /* Handle pull request state */
+              .then(pipeline => {
+                return new Promise((resolve, reject) => {
+                  const action = message.pull_request.state === "closed"
+                    ? "deletePipeline"
+                    : "startPipelineExecution"
+                  manager[action]({
+                    name: pipeline.name
+                  }, err => {
+                    return err
+                      ? reject(err)
+                      : resolve()
+                  })
+                })
               })
+
+          /* Push event */
+          } else if (type === "push") {
+            return new Promise((resolve, reject) => {
+              if (message.ref.match(/master$/)) {
+                manager.startPipelineExecution({
+                  name: master.name
+                }, err => {
+                  return err
+                    ? reject(err)
+                    : resolve()
+                })
+
+              /* Don't build branches */
+              } else {
+                resolve()
+              }
             })
-          })
-
-          /* The event was processed */
-          .then(resolve)
-
-          /* Something went wrong */
-          .catch(reject)
-
-      /* Event for push on master */
-      } else if (type === "push") {
-        const message = JSON.parse(record.Sns.Message)
-
-        // trigger build on master!
-
-      /* Abort, if we encounter an unsupported event */
-      } else {
-        return reject(
-          new Error(`Invalid event type: ${type}`))
-      }
-    }
-  })
+          }
+        })
+      }, Promise.resolve())
+    })
 
     /* The event was processed */
-    .then(result => cb(null, result))
+    .then(data => cb(null, data))
 
     /* An Error occurred */
     .catch(cb)

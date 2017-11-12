@@ -1,7 +1,7 @@
 {
   "name": "terraform-aws-github-ci",
   "version": "0.0.0",
-  "description": "AWS CodePipeline with GitHub webhook integration",
+  "description": "GitHub CI built with AWS CodePipeline",
   "keywords": [
     "aws",
     "codepipeline",

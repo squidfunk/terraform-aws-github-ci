@@ -207,8 +207,8 @@ data "aws_iam_policy_document" "github" {
 
 # aws_iam_role.codebuild
 resource "aws_iam_role" "codebuild" {
-  name = "github-ci-codebuild"
-  path = "/github-ci/codebuild/"
+  name = "${var.namespace}-codebuild"
+  path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
     data.aws_iam_policy_document.codebuild_assume_role.json
@@ -217,8 +217,8 @@ resource "aws_iam_role" "codebuild" {
 
 # aws_iam_policy.codebuild
 resource "aws_iam_policy" "codebuild" {
-  name = "github-ci-codebuild"
-  path = "/github-ci/codebuild/"
+  name = "${var.namespace}-codebuild"
+  path = "/${var.namespace}/codebuild/"
 
   policy = "${
     data.aws_iam_policy_document.codebuild.json
@@ -227,7 +227,7 @@ resource "aws_iam_policy" "codebuild" {
 
 # aws_iam_policy_attachment.codebuild
 resource "aws_iam_policy_attachment" "codebuild" {
-  name = "github-ci-codebuild"
+  name = "${var.namespace}-codebuild"
 
   policy_arn = "${aws_iam_policy.codebuild.arn}"
   roles      = ["${aws_iam_role.codebuild.id}"]
@@ -237,8 +237,8 @@ resource "aws_iam_policy_attachment" "codebuild" {
 
 # aws_iam_role.codepipeline
 resource "aws_iam_role" "codepipeline" {
-  name = "github-ci-codepipeline"
-  path = "/github-ci/codepipeline/"
+  name = "${var.namespace}-codepipeline"
+  path = "/${var.namespace}/codepipeline/"
 
   assume_role_policy = "${
     data.aws_iam_policy_document.codepipeline_assume_role.json
@@ -247,8 +247,8 @@ resource "aws_iam_role" "codepipeline" {
 
 # aws_iam_policy.codepipeline
 resource "aws_iam_policy" "codepipeline" {
-  name = "github-ci-codepipeline"
-  path = "/github-ci/codepipeline/"
+  name = "${var.namespace}-codepipeline"
+  path = "/${var.namespace}/codepipeline/"
 
   policy = "${
     data.aws_iam_policy_document.codepipeline.json
@@ -257,7 +257,7 @@ resource "aws_iam_policy" "codepipeline" {
 
 # aws_iam_policy_attachment.codepipeline
 resource "aws_iam_policy_attachment" "codepipeline" {
-  name = "github-ci-codepipeline"
+  name = "${var.namespace}-codepipeline"
 
   policy_arn = "${aws_iam_policy.codepipeline.arn}"
   roles      = ["${aws_iam_role.codepipeline.id}"]
@@ -267,8 +267,8 @@ resource "aws_iam_policy_attachment" "codepipeline" {
 
 # aws_iam_role.codepipeline_manager
 resource "aws_iam_role" "codepipeline_manager" {
-  name = "github-ci-codepipeline-manager"
-  path = "/github-ci/codepipeline/"
+  name = "${var.namespace}-codepipeline-manager"
+  path = "/${var.namespace}/codepipeline/"
 
   assume_role_policy = "${
     data.aws_iam_policy_document.codepipeline_manager_assume_role.json
@@ -277,8 +277,8 @@ resource "aws_iam_role" "codepipeline_manager" {
 
 # aws_iam_policy.codepipeline_manager
 resource "aws_iam_policy" "codepipeline_manager" {
-  name = "github-ci-codepipeline-manager"
-  path = "/github-ci/codepipeline/"
+  name = "${var.namespace}-codepipeline-manager"
+  path = "/${var.namespace}/codepipeline/"
 
   policy = "${
     data.aws_iam_policy_document.codepipeline_manager.json
@@ -287,7 +287,7 @@ resource "aws_iam_policy" "codepipeline_manager" {
 
 # aws_iam_policy_attachment.codepipeline_manager
 resource "aws_iam_policy_attachment" "codepipeline_manager" {
-  name = "github-ci-codepipeline-manager"
+  name = "${var.namespace}-codepipeline-manager"
 
   policy_arn = "${aws_iam_policy.codepipeline_manager.arn}"
   roles      = ["${aws_iam_role.codepipeline_manager.id}"]
@@ -297,8 +297,8 @@ resource "aws_iam_policy_attachment" "codepipeline_manager" {
 
 # aws_iam_user.github
 resource "aws_iam_user" "github" {
-  name = "github-ci-webhook-${var.github_repository}"
-  path = "/github-ci/codepipeline/"
+  name = "${var.namespace}-webhook-${var.github_repository}"
+  path = "/${var.namespace}/codepipeline/"
 }
 
 # aws_iam_access_key.github
@@ -308,7 +308,7 @@ resource "aws_iam_access_key" "github" {
 
 # aws_iam_user_policy.github
 resource "aws_iam_user_policy" "github" {
-  name = "github-ci-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook-${var.github_repository}"
   user = "${aws_iam_user.github.name}"
 
   policy = "${
@@ -416,7 +416,7 @@ resource "aws_codepipeline" "codepipeline" {
 
 # aws_sns_topic.github
 resource "aws_sns_topic" "github" {
-  name = "github-ci-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook-${var.github_repository}"
 }
 
 # aws_sns_topic_subscription.github
@@ -432,7 +432,7 @@ resource "aws_sns_topic_subscription" "github" {
 
 # aws_cloudwatch_event_rule.github_status
 resource "aws_cloudwatch_event_rule" "github_status" {
-  name = "github-ci-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook-${var.github_repository}"
 
   event_pattern = <<PATTERN
 {
@@ -462,7 +462,7 @@ resource "aws_cloudwatch_event_target" "github_status" {
 
 # aws_lambda_function.github_push
 resource "aws_lambda_function" "github_push" {
-  function_name = "github-ci-webhook-${var.github_repository}-push"
+  function_name = "${var.namespace}-webhook-${var.github_repository}-push"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
   filename      = "${path.module}/webhooks/dist/push.zip"
@@ -493,7 +493,7 @@ resource "aws_lambda_permission" "github_push" {
 
 # aws_lambda_function.github_status
 resource "aws_lambda_function" "github_status" {
-  function_name = "github-ci-webhook-${var.github_repository}-status"
+  function_name = "${var.namespace}-webhook-${var.github_repository}-status"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
   filename      = "${path.module}/webhooks/dist/status.zip"

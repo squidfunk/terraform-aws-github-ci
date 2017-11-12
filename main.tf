@@ -463,6 +463,7 @@ resource "aws_lambda_function" "github_push" {
   runtime       = "nodejs6.10"
   filename      = "${path.module}/api/dist/push.zip"
   handler       = "index.default"
+  timeout       = 10
 
   source_code_hash = "${
     base64sha256(file("${path.module}/api/dist/push.zip"))
@@ -494,6 +495,7 @@ resource "aws_lambda_function" "github_status" {
   runtime       = "nodejs6.10"
   filename      = "${path.module}/api/dist/status.zip"
   handler       = "index.default"
+  timeout       = 10
 
   source_code_hash = "${
     base64sha256(file("${path.module}/api/dist/status.zip"))

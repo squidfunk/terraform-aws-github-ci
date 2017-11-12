@@ -28,7 +28,14 @@ import GitHub from "github"
  * ------------------------------------------------------------------------- */
 
 /**
- * Code pipeline to GitHub state mapping
+ * Target URL for CodePipeline
+ *
+ * @type {string}
+ */
+const TARGET = "https://console.aws.amazon.com/codepipeline/home"
+
+/**
+ * CodePipeline to GitHub state mapping
  *
  * @const
  * @type {Object}
@@ -39,6 +46,20 @@ const STATES = {
   RESUMED: "pending",
   FAILED: "failure",
   CANCELED: "error"
+}
+
+/**
+ * Descriptions for state mapping
+ *
+ * @const
+ * @type {Object}
+ */
+const DESCRIPTIONS = {
+  STARTED: "Build running",
+  SUCCEEDED: "Build successful",
+  RESUMED: "Build resumed",
+  FAILED: "Build failed",
+  CANCELED: "Build errored"
 }
 
 /* ----------------------------------------------------------------------------
@@ -102,12 +123,15 @@ export default (event, context, cb) => {
 
     /* Update commit SHA with pipeline state */
     .then(({ pipeline, execution }) => {
+      const url = `${TARGET}?region=${process.env.AWS_REGION}`
       return github.repos.createStatus({
         owner: pipeline.stages[0].actions[0].configuration.Owner,
         repo: pipeline.stages[0].actions[0].configuration.Repo,
         sha: execution.artifactRevisions[0].revisionId,
         state: STATES[event.detail.state],
-        description: process.env.GITHUB_BOT_NAME
+        target_url: `${url}#/view/${pipeline.name}`, // eslint-disable-line
+        context: process.env.GITHUB_BOT_NAME,
+        description: DESCRIPTIONS[event.detail.state]
       })
     })
 

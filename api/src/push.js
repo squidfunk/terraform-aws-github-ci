@@ -112,12 +112,22 @@ export default (event, context, cb) => {
                   }, err => {
                     return err
                       ? reject(err)
-                      : resolve()
+                      : resolve(pipeline)
                   })
                 })
               })
 
-              // update status on github
+              /* Update commit SHA with pipeline state */
+              .then(pipeline => {
+                return github.repos.createStatus({
+                  owner: pipeline.stages[0].actions[0].configuration.Owner,
+                  repo: pipeline.stages[0].actions[0].configuration.Repo,
+                  sha: message.pull_request.head.sha,
+                  state: "pending",
+                  context: process.env.GITHUB_BOT_NAME,
+                  description: "Pending"
+                })
+              })
 
           /* Push event */
           } else if (type === "push") {

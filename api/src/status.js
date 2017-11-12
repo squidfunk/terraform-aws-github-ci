@@ -72,19 +72,38 @@ if (process.env.GITHUB_OAUTH_TOKEN)
 /**
  * Update commit SHA with pipeline state
  *
+ * Currently, there's one design flaw: when multiple GitHub repositories are
+ * built on AWS CodeBuild within the same namespace (default: github-ci),
+ * the projects trigger the lambda functions of all other projects. For this
+ * reason, there's a check for the name of the pipeline, aborting early.
+ *
+ * This could, in theory, be fixed, but it's rather complicated. The problem
+ * lies in the CloudWatch rule event pattern - it should only trigger events
+ * for all pipelines of this project. However, updating the pattern is not
+ * atomic (thus maybe resulting in a race condition). Another strategy might
+ * be to clone the CloudWatch event rule and target for each pipeline, but now
+ * that's even more cleaning up. For this reason we just live with the problem
+ * until someone has the time to fix it.
+ *
  * @param {Object} event - Event
  * @param {Object} context - Context
  * @param {Function} cb - Completion callback
  */
 export default (event, context, cb) => {
   new Promise((resolve, reject) => {
-    manager.getPipeline({
-      name: event.detail.pipeline
-    }, (err, data) => {
-      return err
-        ? reject(err)
-        : resolve(data.pipeline)
-    })
+    if (event.detail.pipeline.indexOf(process.env.GITHUB_REPOSITORY) === 0) {
+      manager.getPipeline({
+        name: event.detail.pipeline
+      }, (err, data) => {
+        return err
+          ? reject(err)
+          : resolve(data.pipeline)
+      })
+
+    /* Wrong pipeline */
+    } else {
+      resolve()
+    }
   })
 
     /* Get pipeline execution to retrieve commit SHA */

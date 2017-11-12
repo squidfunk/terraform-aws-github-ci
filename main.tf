@@ -446,10 +446,6 @@ resource "aws_cloudwatch_event_rule" "github_status" {
 PATTERN
 }
 
-# "detail": {
-#   "pipeline": "${aws_codepipeline.codepipeline.name}"
-# }
-
 # aws_cloudwatch_event_target.github_status
 resource "aws_cloudwatch_event_target" "github_status" {
   rule = "${aws_cloudwatch_event_rule.github_status.name}"

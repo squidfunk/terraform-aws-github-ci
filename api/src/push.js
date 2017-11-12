@@ -48,10 +48,10 @@ export default (event, context, cb) => {
   new Promise((resolve, reject) => {
     manager.getPipeline({
       name: process.env.CODEPIPELINE_NAME
-    }, (err, master) => {
+    }, (err, data) => {
       return err
         ? reject(err)
-        : resolve(master.pipeline)
+        : resolve(data.pipeline)
     })
   })
 
@@ -64,13 +64,11 @@ export default (event, context, cb) => {
 
           /* Pull request event */
           if (type === "pull_request") {
-            const name = `${master.name}.${
-              message.pull_request.head.ref.replace(/\W/g, "-")
-            }`
+            const name = `${master.name}.pr-${message.number}`
             return new Promise((resolve, reject) => {
-              manager.getPipeline({ name }, (err, branch) => {
-                if (branch)
-                  return resolve(branch.pipeline)
+              manager.getPipeline({ name }, (err, data) => {
+                if (data)
+                  return resolve(data.pipeline)
 
                 /* Adjust params to clone pipeline master */
                 master.stages[0].actions[0].configuration.Branch =
@@ -82,10 +80,10 @@ export default (event, context, cb) => {
                 /* Create pipeline for pull request */
                 manager.createPipeline({
                   pipeline: master
-                }, (cloneErr, cloned) => {
-                  return cloneErr
-                    ? reject(cloneErr)
-                    : resolve(cloned.pipeline)
+                }, (createErr, data2) => {
+                  return createErr
+                    ? reject(createErr)
+                    : resolve(data2.pipeline)
                 })
               })
             })
@@ -118,7 +116,7 @@ export default (event, context, cb) => {
                     : resolve()
                 })
 
-              /* Don't build branches */
+              /* Don't build branches without pull requests */
               } else {
                 resolve()
               }

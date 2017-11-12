@@ -21,6 +21,7 @@
  */
 
 import AWS from "aws-sdk"
+import GitHub from "github"
 
 /* ----------------------------------------------------------------------------
  * Variables
@@ -32,6 +33,18 @@ import AWS from "aws-sdk"
  * @type {AWS.CodePipeline}
  */
 const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
+
+/**
+ * GitHub client
+ *
+ * @type {AWS.GitHub}
+ */
+const github = new GitHub()
+if (process.env.GITHUB_OAUTH_TOKEN)
+  github.authenticate({
+    type: "oauth",
+    token: process.env.GITHUB_OAUTH_TOKEN
+  })
 
 /* ----------------------------------------------------------------------------
  * Functions
@@ -45,22 +58,22 @@ const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
  * @param {Function} cb - Completion callback
  */
 export default (event, context, cb) => {
-  new Promise((resolve, reject) => {
-    manager.getPipeline({
-      name: process.env.CODEPIPELINE_NAME
-    }, (err, data) => {
-      return err
-        ? reject(err)
-        : resolve(data.pipeline)
-    })
-  })
+  event.Records.reduce((promise, record) => {
+    const type = record.Sns.MessageAttributes["X-Github-Event"].Value
+    const message = JSON.parse(record.Sns.Message)
 
-    /* Process events sequentially */
-    .then(master => {
-      event.Records.reduce((promise, record) => {
-        return promise.then(() => {
-          const type = record.Sns.MessageAttributes["X-Github-Event"].Value
-          const message = JSON.parse(record.Sns.Message)
+    /* Return promise chain */
+    return promise.then(() => {
+      new Promise((resolve, reject) => {
+        manager.getPipeline({
+          name: message.repository.name
+        }, (err, data) => {
+          return err
+            ? reject(err)
+            : resolve(data.pipeline)
+        })
+      })
+        .then(master => {
 
           /* Pull request event */
           if (type === "pull_request") {
@@ -104,6 +117,8 @@ export default (event, context, cb) => {
                 })
               })
 
+              // update status on github
+
           /* Push event */
           } else if (type === "push") {
             return new Promise((resolve, reject) => {
@@ -123,8 +138,8 @@ export default (event, context, cb) => {
             })
           }
         })
-      }, Promise.resolve())
     })
+  }, Promise.resolve())
 
     /* The event was processed */
     .then(data => cb(null, data))

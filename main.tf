@@ -297,7 +297,7 @@ resource "aws_iam_policy_attachment" "codepipeline_manager" {
 
 # aws_iam_user.github
 resource "aws_iam_user" "github" {
-  name = "${var.namespace}-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook"
   path = "/${var.namespace}/codepipeline/"
 }
 
@@ -308,7 +308,7 @@ resource "aws_iam_access_key" "github" {
 
 # aws_iam_user_policy.github
 resource "aws_iam_user_policy" "github" {
-  name = "${var.namespace}-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook"
   user = "${aws_iam_user.github.name}"
 
   policy = "${
@@ -416,7 +416,7 @@ resource "aws_codepipeline" "codepipeline" {
 
 # aws_sns_topic.github
 resource "aws_sns_topic" "github" {
-  name = "${var.namespace}-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook"
 }
 
 # aws_sns_topic_subscription.github
@@ -432,7 +432,7 @@ resource "aws_sns_topic_subscription" "github" {
 
 # aws_cloudwatch_event_rule.github_status
 resource "aws_cloudwatch_event_rule" "github_status" {
-  name = "${var.namespace}-webhook-${var.github_repository}"
+  name = "${var.namespace}-webhook"
 
   event_pattern = <<PATTERN
 {
@@ -440,8 +440,11 @@ resource "aws_cloudwatch_event_rule" "github_status" {
     "aws.codepipeline"
   ],
   "detail-type": [
-    "CodePipeline Pipeline Execution State Change"
-  ]
+    "CodePipeline Stage Execution State Change"
+  ],
+  "detail": {
+    "stage": ["Build"]
+  }
 }
 PATTERN
 }
@@ -458,7 +461,7 @@ resource "aws_cloudwatch_event_target" "github_status" {
 
 # aws_lambda_function.github_push
 resource "aws_lambda_function" "github_push" {
-  function_name = "${var.namespace}-webhook-${var.github_repository}-push"
+  function_name = "${var.namespace}-webhook-push"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
   filename      = "${path.module}/api/dist/push.zip"
@@ -471,8 +474,8 @@ resource "aws_lambda_function" "github_push" {
 
   environment {
     variables = {
-      CODEPIPELINE_NAME  = "${aws_codepipeline.codepipeline.name}"
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
+      GITHUB_BOT_NAME    = "${var.github_bot_name}"
     }
   }
 }
@@ -490,7 +493,7 @@ resource "aws_lambda_permission" "github_push" {
 
 # aws_lambda_function.github_status
 resource "aws_lambda_function" "github_status" {
-  function_name = "${var.namespace}-webhook-${var.github_repository}-status"
+  function_name = "${var.namespace}-webhook-status"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
   filename      = "${path.module}/api/dist/status.zip"
@@ -503,10 +506,8 @@ resource "aws_lambda_function" "github_status" {
 
   environment {
     variables = {
-      GITHUB_OAUTH_TOKEN  = "${var.github_oauth_token}"
-      GITHUB_ORGANIZATION = "${var.github_organization}"
-      GITHUB_REPOSITORY   = "${var.github_repository}"
-      GITHUB_BOT_NAME     = "${var.github_bot_name}"
+      GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
+      GITHUB_BOT_NAME    = "${var.github_bot_name}"
     }
   }
 }

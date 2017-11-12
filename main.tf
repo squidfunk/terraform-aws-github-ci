@@ -465,11 +465,11 @@ resource "aws_lambda_function" "github_push" {
   function_name = "${var.namespace}-webhook-${var.github_repository}-push"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.module}/webhooks/dist/push.zip"
+  filename      = "${path.module}/api/dist/push.zip"
   handler       = "index.default"
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/webhooks/dist/push.zip"))
+    base64sha256(file("${path.module}/api/dist/push.zip"))
   }"
 
   environment {
@@ -496,11 +496,11 @@ resource "aws_lambda_function" "github_status" {
   function_name = "${var.namespace}-webhook-${var.github_repository}-status"
   role          = "${aws_iam_role.codepipeline_manager.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.module}/webhooks/dist/status.zip"
+  filename      = "${path.module}/api/dist/status.zip"
   handler       = "index.default"
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/webhooks/dist/status.zip"))
+    base64sha256(file("${path.module}/api/dist/status.zip"))
   }"
 
   environment {

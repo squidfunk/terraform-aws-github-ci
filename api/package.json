@@ -1,7 +1,7 @@
 {
   "name": "terraform-aws-github-ci",
   "version": "0.0.0",
-  "description": "GitHub CI using AWS CodePipeline",
+  "description": "GitHub CI server using AWS CodePipeline",
   "keywords": [
     "aws",
     "codepipeline",
@@ -44,6 +44,7 @@
     "babel-plugin-istanbul": "^4.1.5",
     "babel-plugin-root-import": "^5.1.0",
     "babel-preset-env": "^1.6.0",
+    "binary-loader": "0.0.1",
     "cross-env": "^5.0.5",
     "eslint": "^4.8.0",
     "eslint-plugin-jasmine": "^2.9.1",

@@ -23,6 +23,10 @@
 import AWS from "aws-sdk"
 import GitHub from "github"
 
+import errored from "./status/errored.svg"
+import failing from "./status/failing.svg"
+import passing from "./status/passing.svg"
+
 /* ----------------------------------------------------------------------------
  * Constants
  * ------------------------------------------------------------------------- */
@@ -49,7 +53,7 @@ const STATES = {
 }
 
 /**
- * Descriptions for state mapping
+ * Descriptions for states
  *
  * @const
  * @type {Object}
@@ -62,6 +66,18 @@ const DESCRIPTIONS = {
   CANCELED: "Build errored"
 }
 
+/**
+ * Badges for states
+ *
+ * @const
+ * @type {Object}
+ */
+const BADGES = {
+  SUCCEEDED: passing,
+  FAILED: failing,
+  CANCELED: errored
+}
+
 /* ----------------------------------------------------------------------------
  * Variables
  * ------------------------------------------------------------------------- */
@@ -72,6 +88,13 @@ const DESCRIPTIONS = {
  * @type {AWS.CodePipeline}
  */
 const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
+
+/**
+ * S3 client
+ *
+ * @type {AWS}
+ */
+const s3 = new AWS.S3({ apiVersion: "2006-03-01" })
 
 /**
  * GitHub client
@@ -130,8 +153,32 @@ export default (event, context, cb) => {
         sha: execution.artifactRevisions[0].revisionId,
         state: STATES[event.detail.state],
         target_url: `${url}#/view/${pipeline.name}`, // eslint-disable-line
-        context: process.env.GITHUB_BOT_NAME,
+        context: process.env.GITHUB_REPORTER,
         description: DESCRIPTIONS[event.detail.state]
+      })
+
+        /* Pass branch to next task */
+        .then(() => pipeline.stages[0].actions[0].configuration.Repo)
+    })
+
+    /* Update status badge on S3 */
+    .then(branch => {
+      return new Promise((resolve, reject) => {
+        if (branch === "master" && BADGES[event.detail.state]) {
+          s3.putObject({
+            Bucket: process.env.STATUS_BUCKET,
+            Key: `status/${event.detail.pipeline}.svg`,
+            Body: BADGES[event.detail.state],
+            ACL: "public-read",
+            ContentType: "image/svg+xml"
+          }, err => {
+            return err
+              ? reject(err)
+              : resolve()
+          })
+        } else {
+          resolve()
+        }
       })
     })
 

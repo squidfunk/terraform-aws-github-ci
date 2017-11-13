@@ -48,9 +48,9 @@ variable "github_repository" {
   description = "GitHub repository name"
 }
 
-# var.github_bot_name
-variable "github_bot_name" {
-  description = "GitHub commit status bot name"
+# var.github_reporter
+variable "github_reporter" {
+  description = "GitHub commit status reporter"
   default     = "AWS CodePipeline"
 }
 

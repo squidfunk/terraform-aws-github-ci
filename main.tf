@@ -175,6 +175,18 @@ data "aws_iam_policy_document" "codepipeline_manager" {
 
   statement {
     actions = [
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.codepipeline.arn}",
+      "${aws_s3_bucket.codepipeline.arn}/*",
+    ]
+  }
+
+  statement {
+    actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
@@ -475,7 +487,7 @@ resource "aws_lambda_function" "github_push" {
   environment {
     variables = {
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
-      GITHUB_BOT_NAME    = "${var.github_bot_name}"
+      GITHUB_REPORTER    = "${var.github_reporter}"
     }
   }
 }
@@ -507,7 +519,8 @@ resource "aws_lambda_function" "github_status" {
   environment {
     variables = {
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
-      GITHUB_BOT_NAME    = "${var.github_bot_name}"
+      GITHUB_REPORTER    = "${var.github_reporter}"
+      STATUS_BUCKET      = "${aws_s3_bucket.codepipeline.bucket}"
     }
   }
 }

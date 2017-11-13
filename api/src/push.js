@@ -124,8 +124,8 @@ export default (event, context, cb) => {
                   repo: pipeline.stages[0].actions[0].configuration.Repo,
                   sha: message.pull_request.head.sha,
                   state: "pending",
-                  context: process.env.GITHUB_BOT_NAME,
-                  description: "Pending"
+                  context: process.env.GITHUB_REPORTER,
+                  description: "Waiting for status to be reported"
                 })
               })
 

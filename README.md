@@ -46,6 +46,8 @@ terminal.
 support conditional blocks inside resources. However, this feature is currently
 [being implemented][2] and should be released shortly.
 
+  [2]: https://github.com/hashicorp/terraform/issues/7034
+
 ## Configuration
 
 The following parameters can be configured:

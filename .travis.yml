@@ -21,11 +21,7 @@
 language: node_js
 sudo: false
 
-# -----------------------------------------------------------------------------
-# Regular builds
-# -----------------------------------------------------------------------------
-
-# Node.js version and necessary services
+# Node.js version
 node_js: 8
 
 # Limit clone depth to 5, to speed up build
@@ -46,6 +42,6 @@ install:
 
 # Perform build and release
 script:
-  - terraform validate -check-veriables=false
+  - terraform validate -check-variables=false
   - make -C api lint
   - make -C api build

@@ -30,13 +30,12 @@ module "github_ci" {
 ```
 
 After applying your configuration, a status badge can be added to your project's
-README using the `codebuild_badge` and `codebuild_url` outputs printed to the+
-console.
+README using the `codebuild_badge` and `codebuild_url` outputs printed to the
+terminal.
 
 ## Configuration
 
-While this is an example with minimal configuration, the following parameters
-can be configured.
+The following parameters can be configured:
 
 ### Required
 

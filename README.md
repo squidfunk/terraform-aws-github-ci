@@ -8,6 +8,8 @@
 
 # Terraform AWS GitHub CI
 
+[![Join the chat at https://gitter.im/squidfunk/terraform-aws-github-ci](https://badges.gitter.im/squidfunk/terraform-aws-github-ci.svg)](https://gitter.im/squidfunk/terraform-aws-github-ci?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Terraform module to setup a GitHub CI server with pull request and build
 status support using AWS CodeBuild.
 

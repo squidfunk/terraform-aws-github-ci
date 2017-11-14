@@ -31,10 +31,10 @@ Include and configure this module in your Terraform configuration:
 module "github_ci" {
   source = "git::https://github.com/squidfunk/terraform-aws-github-ci.git"
 
-  codebuild_bucket   = "<bucket-name>"
   github_owner       = "<owner>"
   github_repository  = "<repository>"
   github_oauth_token = "<oauth-token>"
+  codebuild_bucket   = "<bucket-name>"
 }
 ```
 

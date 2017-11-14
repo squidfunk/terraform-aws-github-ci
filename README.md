@@ -1,3 +1,8 @@
+[![Travis][travis-image]][travis-link]
+
+  [travis-image]: https://travis-ci.org/squidfunk/terraform-aws-github-ci.svg?branch=master
+  [travis-link]: https://travis-ci.org/squidfunk/terraform-aws-github-ci
+
 # Terraform AWS GitHub CI
 
 A Terraform module to setup a GitHub CI server with pull request and build

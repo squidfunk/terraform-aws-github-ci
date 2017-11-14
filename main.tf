@@ -311,10 +311,6 @@ resource "aws_codebuild_project" "codebuild" {
     location       = "${aws_s3_bucket.codebuild.bucket}"
     name           = "${var.github_repository}"
     namespace_type = "BUILD_ID"
-
-    # ginseng-ci/ginseng-analytics-api/status.svg
-    # ginseng-ci/ginseng-analytics-api/master/
-    # ginseng-ci/ginseng-analytics-api/chore-docs-fixing/DATE~BUILD_ID
   }
 }
 

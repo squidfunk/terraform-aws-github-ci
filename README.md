@@ -31,15 +31,20 @@ Include and configure this module in your Terraform configuration:
 module "github_ci" {
   source = "git::https://github.com/squidfunk/terraform-aws-github-ci.git"
 
-  codebuild_bucket  = "github-ci"
-  github_owner      = "squidfunk"
-  github_repository = "mkdocs-material"
+  codebuild_bucket   = "<bucket-name>"
+  github_owner       = "<owner>"
+  github_repository  = "<repository>"
+  github_oauth_token = "<oauth-token>"
 }
 ```
 
 After applying your configuration, a status badge can be added to your project's
 README using the `codebuild_badge` and `codebuild_url` outputs printed to the
 terminal.
+
+**Note**: the OAuth-token is currently mandatory, because Terraform doesn't
+support conditional blocks inside resources. However, this feature is currently
+[being implemented][2] and should be released shortly.
 
 ## Configuration
 
@@ -57,6 +62,11 @@ The following parameters can be configured:
 - **Description**: GitHub repository name
 - **Default**: `none`
 
+#### `github_oauth_token`
+
+- **Description**: GitHub OAuth token for repository access
+- **Default**: `""`
+
 #### `codebuild_bucket`
 
 - **Description**: S3 bucket to store status badge and artifacts
@@ -68,12 +78,6 @@ The following parameters can be configured:
 
 - **Description**: GitHub commit status reporter
 - **Default**: `"AWS CodeBuild"`
-
-#### `github_oauth_token`
-
-- **Description**: GitHub OAuth token for repository access
-- **Default**: `""`
-
 
 #### `codebuild_compute_type`
 

@@ -35,7 +35,6 @@ variable "namespace" {
 # var.github_oauth_token
 variable "github_oauth_token" {
   description = "GitHub OAuth token for repository access"
-  default     = ""
 }
 
 # var.github_owner

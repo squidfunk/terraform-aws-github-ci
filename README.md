@@ -1,7 +1,10 @@
 [![Travis][travis-image]][travis-link]
+[![Gitter][gitter-image]][gitter-link]
 
   [travis-image]: https://travis-ci.org/squidfunk/terraform-aws-github-ci.svg?branch=master
   [travis-link]: https://travis-ci.org/squidfunk/terraform-aws-github-ci
+  [gitter-image]: https://img.shields.io/gitter/room/squidfunk/terraform-aws-github-ci.svg
+  [gitter-link]: https://gitter.im/squidfunk/terraform-aws-github-ci
 
 # Terraform AWS GitHub CI
 

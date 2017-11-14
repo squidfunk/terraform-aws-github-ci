@@ -32,62 +32,41 @@ import passing from "./status/passing.svg"
  * ------------------------------------------------------------------------- */
 
 /**
- * Target URL for CodePipeline
+ * Status transitions for phases
  *
- * @type {string}
- */
-const TARGET = "https://console.aws.amazon.com/codepipeline/home"
-
-/**
- * CodePipeline to GitHub state mapping
- *
- * @const
  * @type {Object}
  */
-const STATES = {
-  STARTED: "pending",
-  SUCCEEDED: "success",
-  RESUMED: "pending",
-  FAILED: "failure",
-  CANCELED: "error"
+const PHASES = {
+  SUBMITTED: {
+    SUCCEEDED: ["pending", "Provisioning"]
+  },
+  INSTALL: {
+    FAILED: ["error", "Provisioning failed"],
+    SUCCEEDED: ["pending", "Build running"]
+  },
+  BUILD: {
+    FAILED: ["failure", "Build failed"],
+    FAULT: ["error", "Build errored"],
+    STOPPED: ["error", "Build stopped"],
+    TIMED_OUT: ["error", "Build timed out"]
+  }
 }
 
 /**
- * Descriptions for states
- *
- * @const
- * @type {Object}
- */
-const DESCRIPTIONS = {
-  STARTED: "Build running",
-  SUCCEEDED: "Build successful",
-  RESUMED: "Build resumed",
-  FAILED: "Build failed",
-  CANCELED: "Build errored"
-}
-
-/**
- * Badges for states
+ * GitHub state to badge mapping
  *
  * @const
  * @type {Object}
  */
 const BADGES = {
-  SUCCEEDED: passing,
-  FAILED: failing,
-  CANCELED: errored
+  success: passing,
+  failure: failing,
+  error: errored
 }
 
 /* ----------------------------------------------------------------------------
  * Variables
  * ------------------------------------------------------------------------- */
-
-/**
- * Pipeline manager
- *
- * @type {AWS.CodePipeline}
- */
-const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
 
 /**
  * S3 client
@@ -120,71 +99,65 @@ if (process.env.GITHUB_OAUTH_TOKEN)
  * @param {Function} cb - Completion callback
  */
 export default (event, context, cb) => {
-  new Promise((resolve, reject) => {
-    manager.getPipeline({
-      name: event.detail.pipeline
-    }, (err, data) => {
-      return err
-        ? reject(err)
-        : resolve(data.pipeline)
-    })
-  })
+  const info = event.detail["additional-information"]
 
-    /* Get pipeline execution to retrieve commit SHA */
-    .then(pipeline => {
-      return new Promise((resolve, reject) => {
-        manager.getPipelineExecution({
-          pipelineName: pipeline.name,
-          pipelineExecutionId: event.detail["execution-id"]
-        }, (err, data) => {
-          return err
-            ? reject(err)
-            : resolve({ pipeline, execution: data.pipelineExecution })
+  /* Retrieve commit SHA, owner and repository */
+  const sha = info["source-version"]
+  const [, owner, repo] = /github.com\/([^/]+)\/([^/.]+)/
+    .exec(info.source.location) || []
+
+  /* Resolve phase and state mapping */
+  const phase = PHASES[event.detail["completed-phase"]] || {}
+  let [state, description] =
+    phase[event.detail["completed-phase-status"]] || []
+
+  /* Mark build successful in finalizing phase if no errors occured */
+  if (event.detail["completed-phase"] === "FINALIZING")
+    if (!info.phases.find(prev => {
+      return prev["phase-type"]   !== "COMPLETED" &&
+             prev["phase-status"] !== "SUCCEEDED"
+    }))
+      [state, description] = ["success", "Build successful"]
+
+  /* Resolve build reference and run URL */
+  const ref = info.environment["environment-variables"][0].value
+  const run = event.detail["build-id"].split(":").pop()
+  const url = `https://console.aws.amazon.com/codebuild/home?region=${
+    process.env.AWS_REGION}#/builds/${repo}:${run}/view/new`
+
+  /* Report current state and phase description, if any */
+  if (state && description) {
+    github.repos.createStatus({
+      owner, repo, sha, state, description,
+      target_url: url, // eslint-disable-line camelcase
+      context: process.env.GITHUB_REPORTER
+    })
+
+      /* Update status badge on S3 */
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          if (ref === "master" && BADGES[state]) {
+            s3.putObject({
+              Bucket: process.env.STATUS_BUCKET,
+              Key: `${repo}/status.svg`,
+              Body: BADGES[state],
+              ACL: "public-read",
+              ContentType: "image/svg+xml"
+            }, err => {
+              return err
+                ? reject(err)
+                : resolve()
+            })
+          } else {
+            resolve()
+          }
         })
       })
-    })
 
-    /* Update commit SHA with pipeline state */
-    .then(({ pipeline, execution }) => {
-      const url = `${TARGET}?region=${process.env.AWS_REGION}`
-      return github.repos.createStatus({
-        owner: pipeline.stages[0].actions[0].configuration.Owner,
-        repo: pipeline.stages[0].actions[0].configuration.Repo,
-        sha: execution.artifactRevisions[0].revisionId,
-        state: STATES[event.detail.state],
-        target_url: `${url}#/view/${pipeline.name}`, // eslint-disable-line
-        context: process.env.GITHUB_REPORTER,
-        description: DESCRIPTIONS[event.detail.state]
-      })
+      /* The event was processed */
+      .then(data => cb(null, data))
 
-        /* Pass branch to next task */
-        .then(() => pipeline.stages[0].actions[0].configuration.Repo)
-    })
-
-    /* Update status badge on S3 */
-    .then(branch => {
-      return new Promise((resolve, reject) => {
-        if (branch === "master" && BADGES[event.detail.state]) {
-          s3.putObject({
-            Bucket: process.env.STATUS_BUCKET,
-            Key: `status/${event.detail.pipeline}.svg`,
-            Body: BADGES[event.detail.state],
-            ACL: "public-read",
-            ContentType: "image/svg+xml"
-          }, err => {
-            return err
-              ? reject(err)
-              : resolve()
-          })
-        } else {
-          resolve()
-        }
-      })
-    })
-
-    /* The event was processed */
-    .then(data => cb(null, data))
-
-    /* An error occurred */
-    .catch(cb)
+      /* An error occurred */
+      .catch(cb)
+  }
 }

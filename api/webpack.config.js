@@ -40,12 +40,14 @@ const EventHooksPlugin = require("event-hooks-webpack-plugin")
  */
 const resolve = module => {
   const package = require(path.resolve(module, "package.json"))
-  return Object.keys(package.dependencies).reduce((dependencies, name) => {
-    const dependency = fs.existsSync(path.resolve(module, "node_modules", name))
-      ? path.resolve(module, "node_modules", name)
-      : path.resolve(__dirname, "node_modules", name)
-    return [...dependencies, dependency, ...resolve(dependency)]
-  }, [])
+  return Object.keys(package.dependencies || {}).reduce(
+    (dependencies, name) => {
+      const dependency = path.resolve([module, __dirname].find(base => {
+        return fs.existsSync(path.resolve(base, "node_modules", name))
+      }), "node_modules", name)
+      return [...dependencies, dependency, ...resolve(dependency)]
+    },
+  [])
 }
 
 /* ----------------------------------------------------------------------------

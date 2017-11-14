@@ -25,10 +25,10 @@
 # output.codebuild_badge
 output "codebuild_badge" {
   value = "https://s3.amazonaws.com/${
-    var.codepipeline_artifacts_bucket
-  }/status/${
+    var.codebuild_bucket
+  }/${
     var.github_repository
-  }.svg"
+  }/status.svg"
 }
 
 # output.codebuild_url

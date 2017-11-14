@@ -38,9 +38,9 @@ variable "github_oauth_token" {
   default     = ""
 }
 
-# var.github_organization
-variable "github_organization" {
-  description = "GitHub organization name"
+# var.github_owner
+variable "github_owner" {
+  description = "GitHub repository owner"
 }
 
 # var.github_repository
@@ -51,7 +51,7 @@ variable "github_repository" {
 # var.github_reporter
 variable "github_reporter" {
   description = "GitHub commit status reporter"
-  default     = "AWS CodePipeline"
+  default     = "AWS CodeBuild"
 }
 
 # -----------------------------------------------------------------------------
@@ -70,11 +70,7 @@ variable "codebuild_image" {
   default     = "aws/codebuild/ubuntu-base:14.04"
 }
 
-# -----------------------------------------------------------------------------
-# Variables: CodePipeline
-# -----------------------------------------------------------------------------
-
-# var.codepipeline_artifacts_bucket
-variable "codepipeline_artifacts_bucket" {
-  description = "S3 bucket to store build artifacts"
+# var.codebuild_bucket
+variable "codebuild_bucket" {
+  description = "S3 bucket to store status badge and artifacts"
 }

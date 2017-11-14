@@ -28,11 +28,11 @@ import GitHub from "github"
  * ------------------------------------------------------------------------- */
 
 /**
- * Pipeline manager
+ * Build manager
  *
- * @type {AWS.CodePipeline}
+ * @type {AWS.CodeBuild}
  */
-const manager = new AWS.CodePipeline({ apiVersion: "2015-07-09" })
+const codebuild = new AWS.CodeBuild({ apiVersion: "2016-10-06" })
 
 /**
  * GitHub client
@@ -51,7 +51,7 @@ if (process.env.GITHUB_OAUTH_TOKEN)
  * ------------------------------------------------------------------------- */
 
 /**
- * Clone pipeline master for pull requests
+ * Run build on source change
  *
  * @param {Object} event - Event
  * @param {Object} context - Context
@@ -64,90 +64,41 @@ export default (event, context, cb) => {
 
     /* Return promise chain */
     return promise.then(() => {
-      new Promise((resolve, reject) => {
-        manager.getPipeline({
-          name: message.repository.name
-        }, (err, data) => {
-          return err
-            ? reject(err)
-            : resolve(data.pipeline)
-        })
-      })
-        .then(master => {
 
-          /* Pull request event */
-          if (type === "pull_request") {
-            const name = `${master.name}.pr-${message.number}`
-            return new Promise((resolve, reject) => {
-              manager.getPipeline({ name }, (err, data) => {
-                if (data)
-                  return resolve(data.pipeline)
-
-                /* Adjust params to clone pipeline master */
-                master.stages[0].actions[0].configuration.Branch =
-                  message.pull_request.head.ref
-                master.stages[0].actions[0].configuration.OAuthToken =
-                  process.env.GITHUB_OAUTH_TOKEN
-                master.name = name
-
-                /* Create pipeline for pull request */
-                manager.createPipeline({
-                  pipeline: master
-                }, (createErr, data2) => {
-                  return createErr
-                    ? reject(createErr)
-                    : resolve(data2.pipeline)
-                })
-              })
-            })
-
-              /* Handle pull request state */
-              .then(pipeline => {
-                return new Promise((resolve, reject) => {
-                  const action = message.pull_request.state === "closed"
-                    ? "deletePipeline"
-                    : "startPipelineExecution"
-                  manager[action]({
-                    name: pipeline.name
-                  }, err => {
-                    return err
-                      ? reject(err)
-                      : resolve(pipeline)
-                  })
-                })
-              })
-
-              /* Update commit SHA with pipeline state */
-              .then(pipeline => {
-                return github.repos.createStatus({
-                  owner: pipeline.stages[0].actions[0].configuration.Owner,
-                  repo: pipeline.stages[0].actions[0].configuration.Repo,
-                  sha: message.pull_request.head.sha,
-                  state: "pending",
-                  context: process.env.GITHUB_REPORTER,
-                  description: "Waiting for status to be reported"
-                })
-              })
-
-          /* Push event */
-          } else if (type === "push") {
-            return new Promise((resolve, reject) => {
-              if (message.ref.match(/master$/)) {
-                manager.startPipelineExecution({
-                  name: master.name
-                }, err => {
-                  return err
-                    ? reject(err)
-                    : resolve()
-                })
-
-              /* Don't build branches without pull requests */
-              } else {
-                resolve()
+      /* Start build for open pull-request or master */
+      if (type === "pull_request" && message.pull_request.state !== "closed" ||
+          type === "push" && message.ref === "master") {
+        return new Promise((resolve, reject) => {
+          codebuild.startBuild({
+            projectName: message.repository.name,
+            sourceVersion: message.pull_request.head.sha,
+            environmentVariablesOverride: [
+              {
+                name: "GITHUB_HEAD_REF",
+                value: type === "push"
+                  ? message.ref
+                  : message.pull_request.head.ref
               }
-            })
-          }
+            ]
+          }, err => {
+            return err
+              ? reject(err)
+              : resolve()
+          })
         })
+
+          /* Update commit SHA with pipeline state */
+          .then(() => {
+            return github.repos.createStatus({
+              owner: message.repository.owner.login,
+              repo: message.repository.name,
+              sha: message.pull_request.head.sha,
+              state: "pending",
+              context: process.env.GITHUB_REPORTER,
+              description: "Waiting for status to be reported"
+            })
+          })
+      }
     })
   }, Promise.resolve())
 

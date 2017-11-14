@@ -9,11 +9,11 @@ status support using AWS CodeBuild.
 
   [1]: assets/architecture.png
 
-This module registers a GitHub webhook which listens for `push` and
-`pull_request` events and triggers a build of the respective branch if new
-commits are pushed to the repository. All builds run in parallel. The build
-progress and status for a respective commit is reported back to GitHub.
-Furthermore, a badge for the status of `master` is generated and hosted on S3.
+This module registers a GitHub webhook which is triggered for `push` and
+`pull_request` events and starts the build for the respective branch. All
+builds run in parallel. The build progress and status for a respective commit
+is reported back to GitHub. Furthermore, a badge for the status of `master` is
+generated and hosted on S3.
 
 ## Usage
 

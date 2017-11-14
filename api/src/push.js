@@ -62,22 +62,25 @@ export default (event, context, cb) => {
     const type = record.Sns.MessageAttributes["X-Github-Event"].Value
     const message = JSON.parse(record.Sns.Message)
 
+    /* Retrieve commit SHA and reference */
+    const [sha, ref] = type === "pull_request"
+      ? [message.pull_request.head.sha, message.pull_request.head.ref]
+      : [message.after, message.ref.replace("refs/heads/", "")]
+
     /* Return promise chain */
     return promise.then(() => {
 
-      /* Start build for open pull-request or master */
+      /* Start build for open pull request */
       if (type === "pull_request" && message.pull_request.state !== "closed" ||
-          type === "push" && message.ref === "master") {
+          type === "push" && ref === "master") {
         return new Promise((resolve, reject) => {
           codebuild.startBuild({
             projectName: message.repository.name,
-            sourceVersion: message.pull_request.head.sha,
+            sourceVersion: sha,
             environmentVariablesOverride: [
               {
                 name: "GITHUB_HEAD_REF",
-                value: type === "push"
-                  ? message.ref
-                  : message.pull_request.head.ref
+                value: ref
               }
             ]
           }, err => {
@@ -92,7 +95,7 @@ export default (event, context, cb) => {
             return github.repos.createStatus({
               owner: message.repository.owner.login,
               repo: message.repository.name,
-              sha: message.pull_request.head.sha,
+              sha,
               state: "pending",
               context: process.env.GITHUB_REPORTER,
               description: "Waiting for status to be reported"

@@ -142,6 +142,7 @@ export default (event, context, cb) => {
               Key: `${repo}/status.svg`,
               Body: BADGES[state],
               ACL: "public-read",
+              CacheControl: "no-cache, no-store, must-revalidate",
               ContentType: "image/svg+xml"
             }, err => {
               return err

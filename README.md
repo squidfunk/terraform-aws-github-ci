@@ -67,7 +67,7 @@ The following parameters can be configured:
 #### `github_oauth_token`
 
 - **Description**: GitHub OAuth token for repository access
-- **Default**: `""`
+- **Default**: `none`
 
 #### `codebuild_bucket`
 
@@ -95,6 +95,14 @@ The following parameters can be configured:
 
 - **Description**: AWS resource namespace/prefix
 - **Default**: `"github-ci"`
+
+## Design
+
+This module first integrated with AWS CodePipeline but switched to CodeBuild,
+because the former is heavily opinionated in terms of configuraiton and much,
+much slower. For this reason, the deployment of your build artifacts must be
+handled by another module which can be triggered when the build artifacts are
+written to S3.
 
 ## License
 

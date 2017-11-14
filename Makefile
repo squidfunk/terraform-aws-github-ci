@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Martin Donath <martin.donath@squidfunk.com>
+# Copyright (c) 2017 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -18,29 +18,31 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-language: node_js
-sudo: false
+all: clean lint | build
 
-# Node.js version
-node_js: 8
-
-# Limit clone depth to 5, to speed up build
-git:
-  depth: 5
-
-# Cache dependencies
-cache:
-  directories:
-    - node_modules
+# -----------------------------------------------------------------------------
+# Prerequisites
+# -----------------------------------------------------------------------------
 
 # Install dependencies
-install:
-  - curl -fSL "https://releases.hashicorp.com/terraform/0.10.8/terraform_0.10.8_linux_amd64.zip" -o terraform.zip
-  - sudo unzip terraform.zip -d /opt/terraform
-  - sudo ln -s /opt/terraform/terraform /usr/bin/terraform
-  - rm -f terraform.zip
+.terraform:
+	terraform init
 
-# Perform build and release
-script:
-  - make lint
-  - make build
+# -----------------------------------------------------------------------------
+# Rules
+# -----------------------------------------------------------------------------
+
+# Build distribution files
+build: .terraform
+	make -C api build
+
+# Lint source files
+lint: .terraform
+	terraform validate -check-variables=false
+	make -C api lint
+
+# -----------------------------------------------------------------------------
+
+# Special targets
+.PHONY: .FORCE build lint
+.FORCE:

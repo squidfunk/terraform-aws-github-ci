@@ -23,7 +23,37 @@ builds run in parallel. The build progress and status for a respective commit
 is reported back to GitHub. Furthermore, a badge for the status of `master` is
 generated and hosted on S3.
 
+### Cost
+
+Building with this CI server is unbelievably cheap - you only pay what you use.
+Pricings starts at 0,5 ct per build minute, and AWS CodeBuild offers 100 free
+build minutes every month. The price for the other services (Lambda, SNS, S3
+and CloudWatch) are neglectable and should only add a few cents to your monthly
+bill. Compare that to the $69 that services like Travis cost every month,
+regardless of how much you use them.
+
 ## Usage
+
+### Standalone
+
+Prerequisites are an AWS and GitHub account and a repository you want to be
+built. The repository must specify a `buildspec.yml` which is documented
+[here][2]. If you want to get started straight away and have no experience in
+Terraform, just [set up your AWS credentials][3], [install Terraform][4], clone
+the repository and apply the configuration from the root folder with:
+
+``` bash
+terraform apply \
+  -var github_owner=<owner> \
+  -var github_repository=<repository> \
+  -var github_oauth_token=<oauth-token> \
+  -var codebuilt_bucket=<bucket-name>
+```
+
+Now, when you push to master, or create a pull request, CodeBuild will
+automatically build the commit and report the status back to GitHub.
+
+### As a Module
 
 Include and configure this module in your Terraform configuration:
 
@@ -38,19 +68,23 @@ module "github_ci" {
 }
 ```
 
-After applying your configuration, a status badge can be added to your project's
+All resources (including the S3 bucket) are created through this module. After
+applying your configuration, a status badge can be added to your project's
 README using the `codebuild_badge` and `codebuild_url` outputs printed to the
 terminal.
 
 **Note**: the OAuth-token is currently mandatory, because Terraform doesn't
 support conditional blocks inside resources. However, this feature is currently
-[being implemented][2] and should be released shortly.
+[being implemented][5] and should be released shortly.
 
-  [2]: https://github.com/hashicorp/terraform/issues/7034
+  [2]: http://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.htm
+  [3]: http://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-getting-started.html
+  [4]: https://www.terraform.io/downloads.html
+  [5]: https://github.com/hashicorp/terraform/issues/7034
 
 ## Configuration
 
-The following parameters can be configured:
+The following variables can be configured:
 
 ### Required
 
@@ -96,13 +130,15 @@ The following parameters can be configured:
 - **Description**: AWS resource namespace/prefix
 - **Default**: `"github-ci"`
 
-## Design
+## Limitations
 
 This module first integrated with AWS CodePipeline but switched to CodeBuild,
-because the former is heavily opinionated in terms of configuraiton and much,
+because the former is heavily opinionated in terms of configuration and much,
 much slower. For this reason, the deployment of your build artifacts must be
 handled by another module which can be triggered when the build artifacts are
-written to S3.
+written to S3, most likely by [using a Lambda function][6].
+
+  [6]: http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
 
 ## License
 

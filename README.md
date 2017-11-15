@@ -50,7 +50,7 @@ terraform apply \
   -var github_owner=<owner> \
   -var github_repository=<repository> \
   -var github_oauth_token=<oauth-token> \
-  -var codebuilt_bucket=<bucket-name>
+  -var codebuild_bucket=<bucket-name>
 ```
 
 Now, when you push to master, or create a pull request, CodeBuild will

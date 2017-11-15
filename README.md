@@ -1,10 +1,13 @@
 [![Travis][travis-image]][travis-link]
 [![Gitter][gitter-image]][gitter-link]
+[![GitHub][github-image]][github-link]
 
   [travis-image]: https://travis-ci.org/squidfunk/terraform-aws-github-ci.svg?branch=master
   [travis-link]: https://travis-ci.org/squidfunk/terraform-aws-github-ci
   [gitter-image]: https://badges.gitter.im/squidfunk/terraform-aws-github-ci.svg
   [gitter-link]: https://gitter.im/squidfunk/terraform-aws-github-ci
+  [github-image]: https://img.shields.io/github/release/squidfunk/terraform-aws-github-ci.svg
+  [github-link]: https://github.com/squidfunk/terraform-aws-github-ci/releases
 
 # Terraform AWS GitHub CI
 
@@ -36,11 +39,11 @@ regardless of how much you use them.
 
 ### Standalone
 
-Prerequisites are an AWS and GitHub account and a repository you want to be
-built. The repository must specify a `buildspec.yml` which is documented
-[here][2]. If you want to get started straight away and have no experience in
-Terraform, just [set up your AWS credentials][3], [install Terraform][4], clone
-the repository and apply the configuration from the root folder with:
+You need an AWS and GitHub account and a repository you want to be built. The
+repository must specify a `buildspec.yml` which is documented [here][2]. If you
+want to get started straight away and have no experience in Terraform, just
+[set up your AWS credentials][3], [install Terraform][4], clone the repository
+and apply the configuration from the root folder with:
 
 ``` bash
 terraform apply \

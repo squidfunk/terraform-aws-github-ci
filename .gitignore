@@ -32,8 +32,9 @@ terraform.tfstate*
 node_modules
 npm-debug.log*
 
-# Distribution files
-dist
+# Distribution files except *.zip
+api/dist/*
+!api/dist/*.zip
 
 # Coverage reports
 .nyc_output

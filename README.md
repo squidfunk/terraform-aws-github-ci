@@ -53,7 +53,7 @@ terraform apply \
   -var codebuild_bucket=<bucket-name>
 ```
 
-Now, when you push to master, or create a pull request, CodeBuild will
+Now, when you push to `master`, or create a pull request, CodeBuild will
 automatically build the commit and report the status back to GitHub.
 
 ### As a Module

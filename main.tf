@@ -268,7 +268,7 @@ resource "aws_s3_bucket" "codebuild" {
 resource "aws_s3_bucket_object" "codebuild" {
   bucket        = "${aws_s3_bucket.codebuild.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/api/src/status/none.svg"
+  source        = "${path.module}/api/src/status/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"

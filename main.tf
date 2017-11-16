@@ -52,120 +52,30 @@ data "template_file" "codebuild_source_location" {
 # Data: IAM
 # -----------------------------------------------------------------------------
 
-# data.aws_iam_policy_document.codebuild_assume_role.json
-data "aws_iam_policy_document" "codebuild_assume_role" {
-  statement {
-    actions = [
-      "sts:AssumeRole",
-    ]
+# data.template_file.codebuild_iam_policy.rendered
+data "template_file" "codebuild_iam_policy" {
+  template = "${file("${path.module}/aws-iam/policies/codebuild.json")}"
 
-    principals {
-      type = "Service"
-
-      identifiers = [
-        "codebuild.amazonaws.com",
-      ]
-    }
+  vars {
+    bucket = "${aws_s3_bucket.codebuild.arn}"
   }
 }
 
-# data.aws_iam_policy_document.codebuild.json
-data "aws_iam_policy_document" "codebuild" {
-  statement {
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
+# data.template_file.codebuild_manager_iam_policy.rendered
+data "template_file" "codebuild_manager_iam_policy" {
+  template = "${file("${path.module}/aws-iam/policies/codebuild-manager.json")}"
 
-    resources = [
-      "arn:aws:logs:*:*:*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:GetObject",
-      "s3:GetObjectVersion",
-      "s3:GetBucketVersioning",
-      "s3:PutObject",
-    ]
-
-    resources = [
-      "${aws_s3_bucket.codebuild.arn}",
-      "${aws_s3_bucket.codebuild.arn}/*",
-    ]
+  vars {
+    bucket = "${aws_s3_bucket.codebuild.arn}"
   }
 }
 
-# -----------------------------------------------------------------------------
+# data.template_file.webhook_iam_policy.rendered
+data "template_file" "webhook_iam_policy" {
+  template = "${file("${path.module}/aws-iam/policies/webhook.json")}"
 
-# data.aws_iam_policy_document.codebuild_manager_assume_role.json
-data "aws_iam_policy_document" "codebuild_manager_assume_role" {
-  statement {
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    principals {
-      type = "Service"
-
-      identifiers = [
-        "lambda.amazonaws.com",
-      ]
-    }
-  }
-}
-
-# data.aws_iam_policy_document.codebuild_manager.json
-data "aws_iam_policy_document" "codebuild_manager" {
-  statement {
-    actions = [
-      "codebuild:StartBuild",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:PutObject",
-      "s3:PutObjectAcl",
-    ]
-
-    resources = [
-      "${aws_s3_bucket.codebuild.arn}",
-      "${aws_s3_bucket.codebuild.arn}/*",
-    ]
-  }
-
-  statement {
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-
-    resources = [
-      "arn:aws:logs:*:*:*",
-    ]
-  }
-}
-
-# -----------------------------------------------------------------------------
-
-# data.aws_iam_policy_document.webhook.json
-data "aws_iam_policy_document" "webhook" {
-  statement {
-    actions = [
-      "sns:Publish",
-    ]
-
-    resources = [
-      "${aws_sns_topic.webhook.arn}",
-    ]
+  vars {
+    topic = "${aws_sns_topic.webhook.arn}"
   }
 }
 
@@ -179,7 +89,7 @@ resource "aws_iam_role" "codebuild" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    data.aws_iam_policy_document.codebuild_assume_role.json
+    file("${path.module}/aws-iam/policies/codebuild-assume-role.json")
   }"
 }
 
@@ -188,9 +98,7 @@ resource "aws_iam_policy" "codebuild" {
   name = "${var.namespace}-codebuild"
   path = "/${var.namespace}/codebuild/"
 
-  policy = "${
-    data.aws_iam_policy_document.codebuild.json
-  }"
+  policy = "${data.template_file.codebuild_iam_policy.rendered}"
 }
 
 # aws_iam_policy_attachment.codebuild
@@ -209,7 +117,7 @@ resource "aws_iam_role" "codebuild_manager" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    data.aws_iam_policy_document.codebuild_manager_assume_role.json
+    file("${path.module}/aws-iam/policies/codebuild-manager-assume-role.json")
   }"
 }
 
@@ -218,9 +126,7 @@ resource "aws_iam_policy" "codebuild_manager" {
   name = "${var.namespace}-codebuild-manager"
   path = "/${var.namespace}/codebuild/"
 
-  policy = "${
-    data.aws_iam_policy_document.codebuild_manager.json
-  }"
+  policy = "${data.template_file.codebuild_manager_iam_policy.rendered}"
 }
 
 # aws_iam_policy_attachment.codebuild_manager
@@ -249,9 +155,7 @@ resource "aws_iam_user_policy" "webhook" {
   name = "${var.namespace}-webhook"
   user = "${aws_iam_user.webhook.name}"
 
-  policy = "${
-    data.aws_iam_policy_document.webhook.json
-  }"
+  policy = "${data.template_file.webhook_iam_policy.rendered}"
 }
 
 # -----------------------------------------------------------------------------
@@ -268,7 +172,7 @@ resource "aws_s3_bucket" "codebuild" {
 resource "aws_s3_bucket_object" "codebuild" {
   bucket        = "${aws_s3_bucket.codebuild.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/api/src/status/unknown.svg"
+  source        = "${path.module}/aws-lambda/src/status/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"
@@ -316,6 +220,25 @@ resource "aws_codebuild_project" "codebuild" {
 }
 
 # -----------------------------------------------------------------------------
+# Resources: CloudWatch
+# -----------------------------------------------------------------------------
+
+# aws_cloudwatch_event_rule.codebuild
+resource "aws_cloudwatch_event_rule" "codebuild" {
+  name = "${var.namespace}-codebuild"
+
+  event_pattern = "${
+    file("${path.module}/aws-cw/rules/codebuild.json")
+  }"
+}
+
+# aws_cloudwatch_event_target.webhook_status
+resource "aws_cloudwatch_event_target" "webhook_status" {
+  rule = "${aws_cloudwatch_event_rule.codebuild.name}"
+  arn  = "${aws_lambda_function.webhook_status.arn}"
+}
+
+# -----------------------------------------------------------------------------
 # Resources: SNS
 # -----------------------------------------------------------------------------
 
@@ -332,47 +255,6 @@ resource "aws_sns_topic_subscription" "webhook" {
 }
 
 # -----------------------------------------------------------------------------
-# Resources: CloudWatch
-# -----------------------------------------------------------------------------
-
-# aws_cloudwatch_event_rule.webhook_status
-resource "aws_cloudwatch_event_rule" "webhook_status" {
-  name = "${var.namespace}-webhook"
-
-  event_pattern = <<PATTERN
-{
-  "source": [
-    "aws.codebuild"
-  ],
-  "detail-type": [
-    "CodeBuild Build Phase Change"
-  ],
-  "detail": {
-    "completed-phase": [
-      "SUBMITTED",
-      "INSTALL",
-      "BUILD",
-      "FINALIZING"
-    ],
-    "completed-phase-status": [
-      "SUCCEEDED",
-      "STOPPED",
-      "FAILED",
-      "FAULT",
-      "TIMED_OUT"
-    ]
-  }
-}
-PATTERN
-}
-
-# aws_cloudwatch_event_target.webhook_status
-resource "aws_cloudwatch_event_target" "webhook_status" {
-  rule = "${aws_cloudwatch_event_rule.webhook_status.name}"
-  arn  = "${aws_lambda_function.webhook_status.arn}"
-}
-
-# -----------------------------------------------------------------------------
 # Resources: Lambda
 # -----------------------------------------------------------------------------
 
@@ -381,12 +263,12 @@ resource "aws_lambda_function" "webhook_push" {
   function_name = "${var.namespace}-webhook-push"
   role          = "${aws_iam_role.codebuild_manager.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.module}/api/dist/push.zip"
+  filename      = "${path.module}/aws-lambda/dist/push.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/api/dist/push.zip"))
+    base64sha256(file("${path.module}/aws-lambda/dist/push.zip"))
   }"
 
   environment {
@@ -413,12 +295,12 @@ resource "aws_lambda_function" "webhook_status" {
   function_name = "${var.namespace}-webhook-status"
   role          = "${aws_iam_role.codebuild_manager.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.module}/api/dist/status.zip"
+  filename      = "${path.module}/aws-lambda/dist/status.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/api/dist/status.zip"))
+    base64sha256(file("${path.module}/aws-lambda/dist/status.zip"))
   }"
 
   environment {
@@ -436,7 +318,7 @@ resource "aws_lambda_permission" "webhook_status" {
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.webhook_status.arn}"
   principal     = "events.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_event_rule.webhook_status.arn}"
+  source_arn    = "${aws_cloudwatch_event_rule.codebuild.arn}"
 }
 
 # -----------------------------------------------------------------------------

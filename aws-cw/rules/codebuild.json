@@ -1,0 +1,23 @@
+{
+  "source": [
+    "aws.codebuild"
+  ],
+  "detail-type": [
+    "CodeBuild Build Phase Change"
+  ],
+  "detail": {
+    "completed-phase": [
+      "SUBMITTED",
+      "INSTALL",
+      "BUILD",
+      "FINALIZING"
+    ],
+    "completed-phase-status": [
+      "SUCCEEDED",
+      "STOPPED",
+      "FAILED",
+      "FAULT",
+      "TIMED_OUT"
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 terraform-aws-github-ci-0.1.1 (2017-11-15)
 
-  * Fixed distribution *.zips not being included
+  * Fixed missing lambda distribution files
   * Fixed invalid source location for initial status badge
 
 terraform-aws-github-ci-0.1.0 (2017-11-15)

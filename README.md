@@ -73,8 +73,8 @@ module "github_ci" {
 
 All resources (including the S3 bucket) are created through this module. After
 applying your configuration, a status badge can be added to your project's
-README using the `codebuild_badge` and `codebuild_url` outputs printed to the
-terminal.
+README using the `codebuild_badge_url` and `codebuild_url` outputs printed to
+the terminal.
 
 **Note**: the OAuth-token is currently mandatory, because Terraform doesn't
 support conditional blocks inside resources. However, this feature is currently

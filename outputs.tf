@@ -22,8 +22,8 @@
 # Outputs: CodeBuild
 # -----------------------------------------------------------------------------
 
-# output.codebuild_badge
-output "codebuild_badge" {
+# output.codebuild_badge_url
+output "codebuild_badge_url" {
   value = "https://s3.amazonaws.com/${
     var.codebuild_bucket
   }/${
@@ -38,4 +38,9 @@ output "codebuild_url" {
   }#/projects/${
     var.github_repository
   }/view"
+}
+
+# output.codebuild_service_role
+output "codebuild_service_role" {
+  value = "${aws_codebuild_project.codebuild.service_role}"
 }

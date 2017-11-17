@@ -189,6 +189,8 @@ resource "aws_s3_bucket_object" "codebuild" {
 
 # aws_codebuild_project.codebuild
 resource "aws_codebuild_project" "codebuild" {
+  count = "${signum(length(var.codebuild_project))}"
+
   name = "${var.github_repository}"
 
   build_timeout = "5"

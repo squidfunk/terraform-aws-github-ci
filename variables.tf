@@ -57,6 +57,12 @@ variable "github_reporter" {
 # Variables: CodeBuild
 # -----------------------------------------------------------------------------
 
+# var.codebuild_project
+variable "codebuild_project" {
+  description = "CodeBuild project name (won't create default project)"
+  default     = ""
+}
+
 # var.codebuild_compute_type
 variable "codebuild_compute_type" {
   description = "Compute resources used by the build"

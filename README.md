@@ -61,7 +61,7 @@ Include and configure this module in your Terraform configuration:
 
 ``` hcl
 module "github_ci" {
-  source = "git::https://github.com/squidfunk/terraform-aws-github-ci.git"
+  source = "github.com/squidfunk/terraform-aws-github-ci"
 
   github_owner       = "<owner>"
   github_repository  = "<repository>"
@@ -149,8 +149,6 @@ of the default project which has the following configuration:
 
 ``` hcl
 resource "aws_codebuild_project" "codebuild" {
-  count = "${length(var.codebuild_project) == 0 ? 1 : 0}"
-
   name = "${var.github_repository}"
 
   build_timeout = "5"
@@ -162,7 +160,7 @@ resource "aws_codebuild_project" "codebuild" {
 
     auth {
       type     = "OAUTH"
-      resource = "..."
+      resource = "${var.github_oauth_token}"
     }
   }
 

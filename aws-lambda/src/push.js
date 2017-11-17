@@ -79,8 +79,12 @@ export default (event, context, cb) => {
             sourceVersion: sha,
             environmentVariablesOverride: [
               {
-                name: "GIT_COMMIT",
+                name: "GIT_BRANCH",
                 value: ref
+              },
+              {
+                name: "GIT_COMMIT",
+                value: sha
               }
             ]
           }, err => {

@@ -26,7 +26,8 @@
 .terraform.tfstate.lock.info
 
 # Terraform state
-terraform.tfstate*
+*.tfstate
+*.tfstate.backup
 
 # NPM
 node_modules

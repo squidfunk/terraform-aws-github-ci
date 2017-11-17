@@ -89,7 +89,7 @@ resource "aws_iam_role" "codebuild" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    file("${path.module}/aws-iam/policies/codebuild-assume-role.json")
+    file("${path.module}/aws-iam/policies/assume-role/codebuild.json")
   }"
 }
 
@@ -117,7 +117,7 @@ resource "aws_iam_role" "codebuild_manager" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    file("${path.module}/aws-iam/policies/codebuild-manager-assume-role.json")
+    file("${path.module}/aws-iam/policies/assume-role/codebuild-manager.json")
   }"
 }
 

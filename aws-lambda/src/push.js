@@ -79,7 +79,7 @@ export default (event, context, cb) => {
             sourceVersion: sha,
             environmentVariablesOverride: [
               {
-                name: "GITHUB_HEAD_REF",
+                name: "GIT_COMMIT",
                 value: ref
               }
             ]

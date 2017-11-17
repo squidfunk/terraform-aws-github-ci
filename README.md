@@ -182,10 +182,11 @@ resource "aws_codebuild_project" "codebuild" {
 }
 ```
 
-The service role and the bucket are always created and exported as
-`codebuild_service_role` and `codebuild_bucket`. You can reference them in your
-CodeBuild resource definition, e.g. to attach further policies, and thus avoid
-the creation of your own service role and bucket.
+The corresponding service role and the bucket are always created and exported
+as `codebuild_service_role_arn`, `codebuild_service_role_name` and
+`codebuild_bucket`. You can reference them in your CodeBuild resource
+definition, e.g. to attach further policies, and thus avoid the creation of
+your own service role and bucket.
 
 ## Limitations
 

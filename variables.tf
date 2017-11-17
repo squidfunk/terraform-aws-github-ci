@@ -32,11 +32,6 @@ variable "namespace" {
 # Variables: GitHub
 # -----------------------------------------------------------------------------
 
-# var.github_oauth_token
-variable "github_oauth_token" {
-  description = "GitHub OAuth token for repository access"
-}
-
 # var.github_owner
 variable "github_owner" {
   description = "GitHub repository owner"
@@ -45,6 +40,11 @@ variable "github_owner" {
 # var.github_repository
 variable "github_repository" {
   description = "GitHub repository name"
+}
+
+# var.github_oauth_token
+variable "github_oauth_token" {
+  description = "GitHub OAuth token for repository access"
 }
 
 # var.github_reporter

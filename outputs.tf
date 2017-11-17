@@ -22,9 +22,14 @@
 # Outputs: CodeBuild
 # -----------------------------------------------------------------------------
 
-# output.codebuild_service_role
-output "codebuild_service_role" {
+# output.codebuild_service_role_name
+output "codebuild_service_role_name" {
   value = "${aws_iam_role.codebuild.name}"
+}
+
+# output.codebuild_service_role_arn
+output "codebuild_service_role_arn" {
+  value = "${aws_iam_role.codebuild.arn}"
 }
 
 # output.codebuild_bucket

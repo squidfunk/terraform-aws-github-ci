@@ -72,4 +72,5 @@ variable "codebuild_image" {
 # var.codebuild_bucket
 variable "codebuild_bucket" {
   description = "S3 bucket to store status badge and artifacts"
+  default     = ""
 }

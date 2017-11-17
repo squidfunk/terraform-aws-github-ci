@@ -49,8 +49,7 @@ and apply the configuration from the root folder with:
 terraform apply \
   -var github_owner=<owner> \
   -var github_repository=<repository> \
-  -var github_oauth_token=<oauth-token> \
-  -var codebuild_bucket=<bucket-name>
+  -var github_oauth_token=<oauth-token>
 ```
 
 Now, when you push to `master`, or create a pull request, CodeBuild will
@@ -67,7 +66,6 @@ module "github_ci" {
   github_owner       = "<owner>"
   github_repository  = "<repository>"
   github_oauth_token = "<oauth-token>"
-  codebuild_bucket   = "<bucket-name>"
 }
 ```
 
@@ -106,11 +104,6 @@ The following variables can be configured:
 - **Description**: GitHub OAuth token for repository access
 - **Default**: `none`
 
-#### `codebuild_bucket`
-
-- **Description**: S3 bucket to store status badge and artifacts
-- **Default**: `none`
-
 ### Optional
 
 #### `github_reporter`
@@ -127,6 +120,11 @@ The following variables can be configured:
 
 - **Description**: Base image for provisioning (AWS Registry, Docker)
 - **Default**: `"aws/codebuild/ubuntu-base:14.04"`
+
+#### `codebuild_bucket`
+
+- **Description**: S3 bucket to store status badge and artifacts
+- **Default**: `"github-ci"` (default: namespace)
 
 #### `namespace`
 

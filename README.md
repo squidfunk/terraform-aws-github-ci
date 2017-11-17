@@ -55,7 +55,7 @@ terraform apply \
 Now, when you push to `master`, or create a pull request, CodeBuild will
 automatically build the commit and report the status back to GitHub.
 
-### As a Module
+### Module
 
 Include and configure this module in your Terraform configuration:
 
@@ -111,15 +111,25 @@ The following variables can be configured:
 - **Description**: GitHub commit status reporter
 - **Default**: `"AWS CodeBuild"`
 
+#### `codebuild_project`
+
+- **Description**: CodeBuild project name (won't create [default project][6])
+- **Default**: `""`
+- **Conflicts with**: `codebuild_compute_type`, `codebuild_image`
+
+  [6]: #default-project
+
 #### `codebuild_compute_type`
 
 - **Description**: Compute resources used by the build
 - **Default**: `"BUILD_GENERAL1_SMALL"`
+- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_image`
 
 - **Description**: Base image for provisioning (AWS Registry, Docker)
 - **Default**: `"aws/codebuild/ubuntu-base:14.04"`
+- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_bucket`
 
@@ -131,15 +141,61 @@ The following variables can be configured:
 - **Description**: AWS resource namespace/prefix
 - **Default**: `"github-ci"`
 
+### Default project
+
+If you need more control over the CodeBuild project, you can pass the name of
+an external CodeBuild project in this variable. This will avoid the creation
+of the default project which has the following configuration:
+
+``` hcl
+resource "aws_codebuild_project" "codebuild" {
+  count = "${length(var.codebuild_project) == 0 ? 1 : 0}"
+
+  name = "${var.github_repository}"
+
+  build_timeout = "5"
+  service_role  = "${aws_iam_role.codebuild.arn}"
+
+  source {
+    type     = "GITHUB"
+    location = "..."
+
+    auth {
+      type     = "OAUTH"
+      resource = "..."
+    }
+  }
+
+  environment {
+    compute_type = "${var.codebuild_compute_type}"
+    type         = "LINUX_CONTAINER"
+    image        = "${var.codebuild_image}"
+  }
+
+  artifacts {
+    type           = "S3"
+    location       = "${aws_s3_bucket.codebuild.bucket}"
+    name           = "${var.github_repository}"
+    namespace_type = "BUILD_ID"
+    packaging      = "ZIP"
+  }
+}
+```
+
+The service role and the bucket are always created and exported as
+`codebuild_service_role` and `codebuild_bucket`. You can reference them in your
+CodeBuild resource definition, e.g. to attach further policies, and thus avoid
+the creation of your own service role and bucket.
+
 ## Limitations
 
 This module first integrated with AWS CodePipeline but switched to CodeBuild,
 because the former is heavily opinionated in terms of configuration and much,
 much slower. For this reason, the deployment of your build artifacts must be
 handled by another module which can be triggered when the build artifacts are
-written to S3, most likely by [using a Lambda function][6].
+written to S3, most likely by [using a Lambda function][7].
 
-  [6]: http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
+  [7]: http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
 
 ## License
 

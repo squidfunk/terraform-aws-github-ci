@@ -189,7 +189,7 @@ resource "aws_s3_bucket_object" "codebuild" {
 
 # aws_codebuild_project.codebuild
 resource "aws_codebuild_project" "codebuild" {
-  count = "${signum(length(var.codebuild_project))}"
+  count = "${length(var.codebuild_project) == 0 ? 1 : 0}"
 
   name = "${var.github_repository}"
 

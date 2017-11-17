@@ -70,7 +70,7 @@ export default (event, context, cb) => {
     /* Return promise chain */
     return promise.then(() => {
 
-      /* Start build for open pull request */
+      /* Start build for open pull request or master branch */
       if (type === "pull_request" && message.pull_request.state !== "closed" ||
           type === "push" && ref === "master") {
         return new Promise((resolve, reject) => {

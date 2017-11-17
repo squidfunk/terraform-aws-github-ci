@@ -164,7 +164,7 @@ resource "aws_iam_user_policy" "webhook" {
 
 # aws_s3_bucket.codebuild
 resource "aws_s3_bucket" "codebuild" {
-  bucket = "${var.codebuild_bucket ? var.codebuild_bucket : var.namespace}"
+  bucket = "${coalesce(var.codebuild_bucket, var.namespace)}"
   acl    = "private"
 }
 

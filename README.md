@@ -124,7 +124,7 @@ The following variables can be configured:
 #### `codebuild_bucket`
 
 - **Description**: S3 bucket to store status badge and artifacts
-- **Default**: `"github-ci"` (default: namespace)
+- **Default**: `"github-ci"` (equal to namespace)
 
 #### `namespace`
 

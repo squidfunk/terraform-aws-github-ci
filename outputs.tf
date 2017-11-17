@@ -42,5 +42,5 @@ output "codebuild_url" {
 
 # output.codebuild_service_role
 output "codebuild_service_role" {
-  value = "${aws_codebuild_project.codebuild.service_role}"
+  value = "${aws_iam_role.codebuild.name}"
 }

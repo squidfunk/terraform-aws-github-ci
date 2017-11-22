@@ -138,7 +138,7 @@ export default (event, context, cb) => {
         return new Promise((resolve, reject) => {
           if (ref === "master" && BADGES[state]) {
             s3.putObject({
-              Bucket: process.env.STATUS_BUCKET,
+              Bucket: process.env.CODEBUILD_BUCKET,
               Key: `${repo}/status.svg`,
               Body: BADGES[state],
               ACL: "public-read",

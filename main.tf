@@ -309,7 +309,7 @@ resource "aws_lambda_function" "webhook_status" {
     variables = {
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
       GITHUB_REPORTER    = "${var.github_reporter}"
-      STATUS_BUCKET      = "${aws_s3_bucket.codebuild.bucket}"
+      CODEBUILD_BUCKET   = "${aws_s3_bucket.codebuild.bucket}"
     }
   }
 }
@@ -340,4 +340,9 @@ resource "github_repository_webhook" "webhook" {
   }
 
   events = ["push", "pull_request"]
+
+  # Ignore, if the webhook already exists
+  lifecycle {
+    ignore_changes = ["*"]
+  }
 }

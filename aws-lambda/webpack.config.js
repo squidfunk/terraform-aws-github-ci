@@ -39,15 +39,14 @@ const EventHooksPlugin = require("event-hooks-webpack-plugin")
  * @return {Array<string>} Paths of dependent modules
  */
 const resolve = module => {
-  const package = require(path.resolve(module, "package.json"))
-  return Object.keys(package.dependencies || {}).reduce(
+  const metadata = require(path.resolve(module, "package.json"))
+  return Object.keys(metadata.dependencies || {}).reduce(
     (dependencies, name) => {
       const dependency = path.resolve([module, __dirname].find(base => {
         return fs.existsSync(path.resolve(base, "node_modules", name))
       }), "node_modules", name)
       return [...dependencies, dependency, ...resolve(dependency)]
-    },
-  [])
+    }, [])
 }
 
 /* ----------------------------------------------------------------------------
@@ -59,7 +58,7 @@ module.exports = {
 
   /* Entrypoints */
   entry: {
-    push:   path.resolve(__dirname, "src/push.js"),
+    push: path.resolve(__dirname, "src/push.js"),
     status: path.resolve(__dirname, "src/status.js")
   },
 
@@ -90,7 +89,7 @@ module.exports = {
 
     /* Post-compilation hook to bundle sources with dependencies */
     new EventHooksPlugin({
-      'done': stats => {
+      done: stats => {
         Object.keys(stats.compilation.entrypoints).forEach(name => {
           const entrypoint = stats.compilation.entrypoints[name]
           entrypoint.chunks.forEach(chunk => {
@@ -106,7 +105,7 @@ module.exports = {
 
                 /* Bundle all non-native modules, except aws-sdk */
                 if (dependency.request && dependency.request !== "aws-sdk" &&
-                    dependency.request.match(/^[^\.]/)) {
+                    dependency.request.match(/^[^.]/)) {
                   const external = path.resolve(
                     __dirname, "node_modules", dependency.request)
                   if (fs.existsSync(external)) {
@@ -114,7 +113,7 @@ module.exports = {
                       path.join("node_modules", dependency.request))
 
                     /* Bundle nested dependencies */
-                    resolve(external).map(subexternal => {
+                    resolve(external).forEach(subexternal => {
                       archive.directory(subexternal,
                         path.relative(__dirname, subexternal))
                     })
@@ -124,7 +123,7 @@ module.exports = {
             })
 
             /* Append compiled sources to archive */
-            archive.directory(path.resolve(__dirname, "dist", name), false);
+            archive.directory(path.resolve(__dirname, "dist", name), false)
 
             /* Finalize and write archive */
             archive.pipe(zipfile)

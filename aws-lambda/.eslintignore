@@ -20,6 +20,3 @@
 
 # Distribution files
 /dist
-
-# ES5 files
-/webpack.config.js

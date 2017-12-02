@@ -20,11 +20,6 @@
 
 provider "aws" {}
 
-provider "github" {
-  token        = "${var.github_oauth_token}"
-  organization = "${var.github_owner}"
-}
-
 # -----------------------------------------------------------------------------
 # Data: Credentials
 # -----------------------------------------------------------------------------
@@ -61,24 +56,6 @@ data "template_file" "codebuild_iam_policy" {
   }
 }
 
-# data.template_file.codebuild_manager_iam_policy.rendered
-data "template_file" "codebuild_manager_iam_policy" {
-  template = "${file("${path.module}/aws-iam/policies/codebuild-manager.json")}"
-
-  vars {
-    bucket = "${aws_s3_bucket.codebuild.arn}"
-  }
-}
-
-# data.template_file.webhook_iam_policy.rendered
-data "template_file" "webhook_iam_policy" {
-  template = "${file("${path.module}/aws-iam/policies/webhook.json")}"
-
-  vars {
-    topic = "${aws_sns_topic.webhook.arn}"
-  }
-}
-
 # -----------------------------------------------------------------------------
 # Resources: IAM
 # -----------------------------------------------------------------------------
@@ -107,55 +84,6 @@ resource "aws_iam_policy_attachment" "codebuild" {
 
   policy_arn = "${aws_iam_policy.codebuild.arn}"
   roles      = ["${aws_iam_role.codebuild.id}"]
-}
-
-# -----------------------------------------------------------------------------
-
-# aws_iam_role.codebuild_manager
-resource "aws_iam_role" "codebuild_manager" {
-  name = "${var.namespace}-codebuild-manager"
-  path = "/${var.namespace}/codebuild/"
-
-  assume_role_policy = "${
-    file("${path.module}/aws-iam/policies/assume-role/codebuild-manager.json")
-  }"
-}
-
-# aws_iam_policy.codebuild_manager
-resource "aws_iam_policy" "codebuild_manager" {
-  name = "${var.namespace}-codebuild-manager"
-  path = "/${var.namespace}/codebuild/"
-
-  policy = "${data.template_file.codebuild_manager_iam_policy.rendered}"
-}
-
-# aws_iam_policy_attachment.codebuild_manager
-resource "aws_iam_policy_attachment" "codebuild_manager" {
-  name = "${var.namespace}-codebuild-manager"
-
-  policy_arn = "${aws_iam_policy.codebuild_manager.arn}"
-  roles      = ["${aws_iam_role.codebuild_manager.id}"]
-}
-
-# -----------------------------------------------------------------------------
-
-# aws_iam_user.webhook
-resource "aws_iam_user" "webhook" {
-  name = "${var.namespace}-webhook"
-  path = "/${var.namespace}/codebuild/"
-}
-
-# aws_iam_access_key.webhook
-resource "aws_iam_access_key" "webhook" {
-  user = "${aws_iam_user.webhook.name}"
-}
-
-# aws_iam_user_policy.webhook
-resource "aws_iam_user_policy" "webhook" {
-  name = "${var.namespace}-webhook"
-  user = "${aws_iam_user.webhook.name}"
-
-  policy = "${data.template_file.webhook_iam_policy.rendered}"
 }
 
 # -----------------------------------------------------------------------------
@@ -222,127 +150,37 @@ resource "aws_codebuild_project" "codebuild" {
 }
 
 # -----------------------------------------------------------------------------
-# Resources: CloudWatch
+# Modules: CloudWatch
 # -----------------------------------------------------------------------------
 
-# aws_cloudwatch_event_rule.codebuild
-resource "aws_cloudwatch_event_rule" "codebuild" {
-  name = "${var.namespace}-codebuild"
+# module.cloudwatch
+module "cloudwatch" {
+  source = "./aws-cloudwatch"
 
-  event_pattern = "${
-    file("${path.module}/aws-cw/rules/codebuild.json")
-  }"
-}
+  namespace = "${var.namespace}"
 
-# aws_cloudwatch_event_target.webhook_status
-resource "aws_cloudwatch_event_target" "webhook_status" {
-  rule = "${aws_cloudwatch_event_rule.codebuild.name}"
-  arn  = "${aws_lambda_function.webhook_status.arn}"
-}
+  github_owner       = "${var.github_owner}"
+  github_repository  = "${var.github_repository}"
+  github_oauth_token = "${var.github_oauth_token}"
+  github_reporter    = "${var.github_reporter}"
 
-# -----------------------------------------------------------------------------
-# Resources: SNS
-# -----------------------------------------------------------------------------
-
-# aws_sns_topic.webhook
-resource "aws_sns_topic" "webhook" {
-  name = "${var.namespace}-webhook"
-}
-
-# aws_sns_topic_subscription.webhook
-resource "aws_sns_topic_subscription" "webhook" {
-  topic_arn = "${aws_sns_topic.webhook.arn}"
-  protocol  = "lambda"
-  endpoint  = "${aws_lambda_function.webhook_push.arn}"
+  bucket = "${aws_s3_bucket.codebuild.bucket}"
 }
 
 # -----------------------------------------------------------------------------
-# Resources: Lambda
+# Modules: SNS
 # -----------------------------------------------------------------------------
 
-# aws_lambda_function.webhook_push
-resource "aws_lambda_function" "webhook_push" {
-  function_name = "${var.namespace}-webhook-push"
-  role          = "${aws_iam_role.codebuild_manager.arn}"
-  runtime       = "nodejs6.10"
-  filename      = "${path.module}/aws-lambda/dist/push.zip"
-  handler       = "index.default"
-  timeout       = 10
+# module.sns
+module "sns" {
+  source = "./aws-sns"
 
-  source_code_hash = "${
-    base64sha256(file("${path.module}/aws-lambda/dist/push.zip"))
-  }"
+  namespace = "${var.namespace}"
 
-  environment {
-    variables = {
-      GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
-      GITHUB_REPORTER    = "${var.github_reporter}"
-    }
-  }
-}
+  github_owner       = "${var.github_owner}"
+  github_repository  = "${var.github_repository}"
+  github_oauth_token = "${var.github_oauth_token}"
+  github_reporter    = "${var.github_reporter}"
 
-# aws_lambda_permission.webhook_push
-resource "aws_lambda_permission" "webhook_push" {
-  statement_id  = "AllowExecutionFromSNS"
-  action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.webhook_push.arn}"
-  principal     = "sns.amazonaws.com"
-  source_arn    = "${aws_sns_topic.webhook.arn}"
-}
-
-# -----------------------------------------------------------------------------
-
-# aws_lambda_function.webhook_status
-resource "aws_lambda_function" "webhook_status" {
-  function_name = "${var.namespace}-webhook-status"
-  role          = "${aws_iam_role.codebuild_manager.arn}"
-  runtime       = "nodejs6.10"
-  filename      = "${path.module}/aws-lambda/dist/status.zip"
-  handler       = "index.default"
-  timeout       = 10
-
-  source_code_hash = "${
-    base64sha256(file("${path.module}/aws-lambda/dist/status.zip"))
-  }"
-
-  environment {
-    variables = {
-      GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
-      GITHUB_REPORTER    = "${var.github_reporter}"
-      CODEBUILD_BUCKET   = "${aws_s3_bucket.codebuild.bucket}"
-    }
-  }
-}
-
-# aws_lambda_permission.webhook_status
-resource "aws_lambda_permission" "webhook_status" {
-  statement_id  = "AllowExecutionFromCloudWatch"
-  action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.webhook_status.arn}"
-  principal     = "events.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_event_rule.codebuild.arn}"
-}
-
-# -----------------------------------------------------------------------------
-# Resources: GitHub
-# -----------------------------------------------------------------------------
-
-# github_repository_webhook.webhook
-resource "github_repository_webhook" "webhook" {
-  repository = "${var.github_repository}"
-  name       = "amazonsns"
-
-  configuration {
-    aws_key    = "${aws_iam_access_key.webhook.id}"
-    aws_secret = "${aws_iam_access_key.webhook.secret}"
-    sns_topic  = "${aws_sns_topic.webhook.arn}"
-    sns_region = "${data.aws_region._.name}"
-  }
-
-  events = ["push", "pull_request"]
-
-  # Ignore, if the webhook already exists
-  lifecycle {
-    ignore_changes = ["*"]
-  }
+  bucket = "${aws_s3_bucket.codebuild.bucket}"
 }

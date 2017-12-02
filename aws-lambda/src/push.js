@@ -37,7 +37,7 @@ const codebuild = new AWS.CodeBuild({ apiVersion: "2016-10-06" })
 /**
  * GitHub client
  *
- * @type {AWS.GitHub}
+ * @type {GitHub}
  */
 const github = new GitHub()
 if (process.env.GITHUB_OAUTH_TOKEN)

@@ -1,14 +1,8 @@
 {
-  "name": "terraform-aws-github-ci",
+  "name": "terraform-aws-github-ci-aws-lambda",
   "version": "0.0.0",
-  "description": "GitHub CI server using AWS CodeBuild",
-  "keywords": [
-    "aws",
-    "codepipeline",
-    "github",
-    "terraform",
-    "webhook"
-  ],
+  "description": "A GitHub CI server using AWS CodeBuild",
+  "keywords": [],
   "homepage": "https://github.com/squidfunk/terraform-aws-github-ci/",
   "bugs": {
     "url": "https://github.com/squidfunk/terraform-aws-github-ci/",

@@ -49,6 +49,27 @@ const resolve = module => {
     }, [])
 }
 
+/**
+ * Automatically resolve entrypoints
+ *
+ * @param  {string} directory Directory
+ *
+ * @return {Object} Entrypoints
+ */
+const entry = directory => {
+  return fs.readdirSync(directory).reduce((entrypoints, file) => {
+    if (fs.statSync(`${directory}/${file}`).isDirectory()) {
+      return { ...entrypoints, ...entry(`${directory}/${file}`) }
+    } else if (file.match(/\.js$/)) {
+      const [, name] = /^(.*?)\.js$/.exec(path.relative(
+        path.resolve(__dirname, "src"), `${directory}/${file}`
+      ))
+      entrypoints[name] = path.resolve(__dirname, "src", `${name}.js`)
+    }
+    return entrypoints
+  }, {})
+}
+
 /* ----------------------------------------------------------------------------
  * Configuration
  * ------------------------------------------------------------------------- */
@@ -57,10 +78,7 @@ module.exports = {
   target: "node",
 
   /* Entrypoints */
-  entry: {
-    push: path.resolve(__dirname, "src/push.js"),
-    status: path.resolve(__dirname, "src/status.js")
-  },
+  entry: entry(path.resolve(__dirname, "src")),
 
   /* Loaders */
   module: {

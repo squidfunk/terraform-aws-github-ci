@@ -18,54 +18,44 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-all: clean lint | build
-
 # -----------------------------------------------------------------------------
-# Prerequisites
+# Variables: General
 # -----------------------------------------------------------------------------
 
-# Install dependencies
-node_modules:
-	npm install
+# var.namespace
+variable "namespace" {
+  description = "AWS resource namespace/prefix"
+}
 
 # -----------------------------------------------------------------------------
-# Targets
+# Variables: GitHub
 # -----------------------------------------------------------------------------
 
-# Build library for distribution
-dist: $(shell find src) .babelrc webpack.config.js
-	$(shell npm bin)/webpack --env.prod
+# var.github_owner
+variable "github_owner" {
+  description = "GitHub repository owner"
+}
+
+# var.github_repository
+variable "github_repository" {
+  description = "GitHub repository name"
+}
+
+# var.github_oauth_token
+variable "github_oauth_token" {
+  description = "GitHub OAuth token for repository access"
+}
+
+# var.github_reporter
+variable "github_reporter" {
+  description = "GitHub commit status reporter"
+}
 
 # -----------------------------------------------------------------------------
-# Rules
+# Variables: S3
 # -----------------------------------------------------------------------------
 
-# Build distribution files
-build: node_modules dist
-
-# Clean distribution files
-clean:
-	rm -rf dist
-
-# Lint source files
-lint: node_modules
-	$(shell npm bin)/eslint --max-warnings 0 .
-
-# Run unit tests
-test: node_modules
-	$(shell npm bin)/cross-env NODE_ENV=test \
-	 	$(shell npm bin)/nyc --reporter=lcov --reporter=text \
-	    	$(shell npm bin)/babel-node tests/index.js
-
-# Run unit tests in watch mode
-watch: node_modules
-	$(shell npm bin)/cross-env NODE_ENV=development \
- 		$(shell npm bin)/nodemon --quiet \
-    		--watch src --watch tests/unit \
-    		--exec $(shell npm bin)/babel-node tests/index.js
-
-# -----------------------------------------------------------------------------
-
-# Special targets
-.PHONY: .FORCE build clean lint test watch
-.FORCE:
+# var.bucket
+variable "bucket" {
+  description = "S3 bucket"
+}

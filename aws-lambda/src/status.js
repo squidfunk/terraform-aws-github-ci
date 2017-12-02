@@ -71,14 +71,14 @@ const BADGES = {
 /**
  * S3 client
  *
- * @type {AWS}
+ * @type {AWS.S3}
  */
 const s3 = new AWS.S3({ apiVersion: "2006-03-01" })
 
 /**
  * GitHub client
  *
- * @type {AWS.GitHub}
+ * @type {GitHub}
  */
 const github = new GitHub()
 if (process.env.GITHUB_OAUTH_TOKEN)

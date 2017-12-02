@@ -61,7 +61,8 @@ Include and configure this module in your Terraform configuration:
 
 ``` hcl
 module "github_ci" {
-  source = "github.com/squidfunk/terraform-aws-github-ci"
+  source  = "github.com/squidfunk/terraform-aws-github-ci"
+  version = "0.2.0"
 
   github_owner       = "<owner>"
   github_repository  = "<repository>"
@@ -172,7 +173,7 @@ resource "aws_codebuild_project" "codebuild" {
 
   artifacts {
     type           = "S3"
-    location       = "${aws_s3_bucket.codebuild.bucket}"
+    location       = "${var.codebuild_bucket}"
     name           = "${var.github_repository}"
     namespace_type = "BUILD_ID"
     packaging      = "ZIP"

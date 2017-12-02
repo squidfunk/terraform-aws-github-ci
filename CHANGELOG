@@ -1,3 +1,9 @@
+terraform-aws-github-ci-0.2.0 (2017-12-02)
+
+  * Added support for external CodeBuild project configuration
+  * Fixed GitHub webhook being set repeatedly due to OAuth token
+  * Restructured project into submodules
+
 terraform-aws-github-ci-0.1.1 (2017-11-15)
 
   * Fixed missing lambda distribution files

@@ -65,8 +65,8 @@ resource "aws_iam_policy_attachment" "lambda" {
 # Resources: CloudWatch
 # -----------------------------------------------------------------------------
 
-# aws_cloudwatch_event_rule.status
-resource "aws_cloudwatch_event_rule" "status" {
+# aws_cloudwatch_event_rule._
+resource "aws_cloudwatch_event_rule" "_" {
   name = "${var.namespace}-status"
 
   event_pattern = "${
@@ -74,18 +74,18 @@ resource "aws_cloudwatch_event_rule" "status" {
   }"
 }
 
-# aws_cloudwatch_event_target.status
-resource "aws_cloudwatch_event_target" "status" {
-  rule = "${aws_cloudwatch_event_rule.status.name}"
-  arn  = "${aws_lambda_function.status.arn}"
+# aws_cloudwatch_event_target._
+resource "aws_cloudwatch_event_target" "_" {
+  rule = "${aws_cloudwatch_event_rule._.name}"
+  arn  = "${aws_lambda_function._.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: Lambda
 # -----------------------------------------------------------------------------
 
-# aws_lambda_function.status
-resource "aws_lambda_function" "status" {
+# aws_lambda_function._
+resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
@@ -106,11 +106,11 @@ resource "aws_lambda_function" "status" {
   }
 }
 
-# aws_lambda_permission.status
-resource "aws_lambda_permission" "status" {
+# aws_lambda_permission._
+resource "aws_lambda_permission" "_" {
   statement_id  = "AllowExecutionFromCloudWatch"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.status.arn}"
+  function_name = "${aws_lambda_function._.arn}"
   principal     = "events.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_event_rule.status.arn}"
+  source_arn    = "${aws_cloudwatch_event_rule._.arn}"
 }

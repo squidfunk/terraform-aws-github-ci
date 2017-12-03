@@ -34,12 +34,12 @@ all: lint | build
 
 # Build distribution files
 build: .terraform
-	make -C aws-lambda build
+	make -C data/aws-lambda build
 
 # Lint source files
 lint: .terraform
 	terraform validate -check-variables=false
-	make -C aws-lambda lint
+	make -C data/aws-lambda lint
 
 # -----------------------------------------------------------------------------
 

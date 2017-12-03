@@ -50,7 +50,7 @@ data "template_file" "webhook_iam_policy" {
   template = "${file("${path.root}/data/aws-iam/policies/webhook.json")}"
 
   vars {
-    topic = "${aws_sns_topic.push.arn}"
+    topic = "${aws_sns_topic._.arn}"
   }
 }
 
@@ -86,21 +86,21 @@ resource "aws_iam_policy_attachment" "lambda" {
 
 # -----------------------------------------------------------------------------
 
-# aws_iam_user.webhook
-resource "aws_iam_user" "webhook" {
+# aws_iam_user._
+resource "aws_iam_user" "_" {
   name = "${var.namespace}-webhook"
   path = "/${var.namespace}/sns/"
 }
 
-# aws_iam_access_key.webhook
-resource "aws_iam_access_key" "webhook" {
-  user = "${aws_iam_user.webhook.name}"
+# aws_iam_access_key._
+resource "aws_iam_access_key" "_" {
+  user = "${aws_iam_user._.name}"
 }
 
-# aws_iam_user_policy.webhook
-resource "aws_iam_user_policy" "webhook" {
+# aws_iam_user_policy._
+resource "aws_iam_user_policy" "_" {
   name = "${var.namespace}-webhook"
-  user = "${aws_iam_user.webhook.name}"
+  user = "${aws_iam_user._.name}"
 
   policy = "${data.template_file.webhook_iam_policy.rendered}"
 }
@@ -109,33 +109,33 @@ resource "aws_iam_user_policy" "webhook" {
 # Resources: SNS
 # -----------------------------------------------------------------------------
 
-# aws_sns_topic.push
-resource "aws_sns_topic" "push" {
-  name = "${var.namespace}-webhook-push"
+# aws_sns_topic._
+resource "aws_sns_topic" "_" {
+  name = "${var.namespace}-webhook"
 }
 
-# aws_sns_topic_subscription.push
-resource "aws_sns_topic_subscription" "push" {
-  topic_arn = "${aws_sns_topic.push.arn}"
+# aws_sns_topic_subscription._
+resource "aws_sns_topic_subscription" "_" {
+  topic_arn = "${aws_sns_topic._.arn}"
   protocol  = "lambda"
-  endpoint  = "${aws_lambda_function.push.arn}"
+  endpoint  = "${aws_lambda_function._.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: Lambda
 # -----------------------------------------------------------------------------
 
-# aws_lambda_function.push
-resource "aws_lambda_function" "push" {
-  function_name = "${var.namespace}-webhook-push"
+# aws_lambda_function._
+resource "aws_lambda_function" "_" {
+  function_name = "${var.namespace}-webhook"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.root}/data/aws-lambda/dist/push.zip"
+  filename      = "${path.root}/data/aws-lambda/dist/webhook.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.root}/data/aws-lambda/dist/push.zip"))
+    base64sha256(file("${path.root}/data/aws-lambda/dist/webhook.zip"))
   }"
 
   environment {
@@ -146,28 +146,28 @@ resource "aws_lambda_function" "push" {
   }
 }
 
-# aws_lambda_permission.push
-resource "aws_lambda_permission" "push" {
+# aws_lambda_permission._
+resource "aws_lambda_permission" "_" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.push.arn}"
+  function_name = "${aws_lambda_function._.arn}"
   principal     = "sns.amazonaws.com"
-  source_arn    = "${aws_sns_topic.push.arn}"
+  source_arn    = "${aws_sns_topic._.arn}"
 }
 
 # -----------------------------------------------------------------------------
 # Resources: GitHub
 # -----------------------------------------------------------------------------
 
-# github_repository_webhook.push
-resource "github_repository_webhook" "push" {
+# github_repository_webhook._
+resource "github_repository_webhook" "_" {
   repository = "${var.github_repository}"
   name       = "amazonsns"
 
   configuration {
-    aws_key    = "${aws_iam_access_key.webhook.id}"
-    aws_secret = "${aws_iam_access_key.webhook.secret}"
-    sns_topic  = "${aws_sns_topic.push.arn}"
+    aws_key    = "${aws_iam_access_key._.id}"
+    aws_secret = "${aws_iam_access_key._.secret}"
+    sns_topic  = "${aws_sns_topic._.arn}"
     sns_region = "${data.aws_region._.name}"
   }
 

@@ -1,5 +1,5 @@
 {
-  "name": "terraform-aws-github-ci-aws-lambda",
+  "name": "terraform-aws-github-ci-data-lambda",
   "version": "0.0.0",
   "description": "A GitHub CI server using AWS CodeBuild",
   "keywords": [],

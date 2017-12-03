@@ -24,7 +24,7 @@
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${path.root}/data/iam/policies/lambda.json")}"
+  template = "${file("${path.module}/../../data/iam/policies/lambda.json")}"
 
   vars {
     bucket = "${var.bucket}"
@@ -37,17 +37,17 @@ data "template_file" "lambda_iam_policy" {
 
 # aws_iam_role.lambda
 resource "aws_iam_role" "lambda" {
-  name = "${var.namespace}-lambda-cloudwatch"
+  name = "${var.namespace}-lambda-status"
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${path.root}/data/iam/policies/assume-role/lambda.json")
+    file("${path.module}/../../data/iam/policies/assume-role/lambda.json")
   }"
 }
 
 # aws_iam_policy.lambda
 resource "aws_iam_policy" "lambda" {
-  name = "${var.namespace}-lambda-cloudwatch"
+  name = "${var.namespace}-lambda-status"
   path = "/${var.namespace}/lambda/"
 
   policy = "${data.template_file.lambda_iam_policy.rendered}"
@@ -55,7 +55,7 @@ resource "aws_iam_policy" "lambda" {
 
 # aws_iam_policy_attachment.lambda
 resource "aws_iam_policy_attachment" "lambda" {
-  name = "${var.namespace}-lambda-cloudwatch"
+  name = "${var.namespace}-lambda-status"
 
   policy_arn = "${aws_iam_policy.lambda.arn}"
   roles      = ["${aws_iam_role.lambda.id}"]
@@ -70,7 +70,7 @@ resource "aws_cloudwatch_event_rule" "_" {
   name = "${var.namespace}-status"
 
   event_pattern = "${
-    file("${path.root}/data/cloudwatch/rules/codebuild.json")
+    file("${path.module}/../../data/cloudwatch/rules/codebuild.json")
   }"
 }
 
@@ -89,12 +89,12 @@ resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.root}/data/lambda/dist/status.zip"
+  filename      = "${path.module}/../../data/lambda/dist/status.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.root}/data/lambda/dist/status.zip"))
+    base64sha256(file("${path.module}/../../data/lambda/dist/status.zip"))
   }"
 
   environment {

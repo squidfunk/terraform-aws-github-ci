@@ -24,11 +24,11 @@ all: lint | build
 # Prerequisites
 # -----------------------------------------------------------------------------
 
-# Install dependencies
+# Install Terraform dependencies
 .terraform:
 	terraform init
 
-# Install dependencies
+# Install NPM dependencies
 node_modules:
 	npm install
 

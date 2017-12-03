@@ -38,7 +38,7 @@ data "aws_region" "_" {
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${path.root}/files/aws-iam/policies/lambda.json")}"
+  template = "${file("${path.root}/data/aws-iam/policies/lambda.json")}"
 
   vars {
     bucket = "${var.bucket}"
@@ -47,7 +47,7 @@ data "template_file" "lambda_iam_policy" {
 
 # data.template_file.webhook_iam_policy.rendered
 data "template_file" "webhook_iam_policy" {
-  template = "${file("${path.root}/files/aws-iam/policies/webhook.json")}"
+  template = "${file("${path.root}/data/aws-iam/policies/webhook.json")}"
 
   vars {
     topic = "${aws_sns_topic.push.arn}"
@@ -64,7 +64,7 @@ resource "aws_iam_role" "lambda" {
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${path.root}/aws-iam/policies/assume-role/lambda.json")
+    file("${path.root}/data/aws-iam/policies/assume-role/lambda.json")
   }"
 }
 
@@ -130,12 +130,12 @@ resource "aws_lambda_function" "push" {
   function_name = "${var.namespace}-webhook-push"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.root}/files/aws-lambda/dist/push.zip"
+  filename      = "${path.root}/data/aws-lambda/dist/push.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.root}/files/aws-lambda/dist/push.zip"))
+    base64sha256(file("${path.root}/data/aws-lambda/dist/push.zip"))
   }"
 
   environment {

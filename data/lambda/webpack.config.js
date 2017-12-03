@@ -24,6 +24,7 @@ const archiver = require("archiver")
 const externals = require("webpack-node-externals")
 const fs = require("fs")
 const path = require("path")
+const webpack = require("webpack")
 
 const EventHooksPlugin = require("event-hooks-webpack-plugin")
 
@@ -74,94 +75,132 @@ const entry = directory => {
  * Configuration
  * ------------------------------------------------------------------------- */
 
-module.exports = {
-  target: "node",
+module.exports = env => {
+  const config = {
+    target: "node",
 
-  /* Entrypoints */
-  entry: entry(path.resolve(__dirname, "src")),
+    /* Entrypoints */
+    entry: entry(path.resolve(__dirname, "src")),
 
-  /* Loaders */
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        use: "babel-loader",
-        exclude: /\/node_modules\//
-      },
-      {
-        test: /\.svg$/,
-        use: "binary-loader"
-      }
-    ]
-  },
+    /* Loaders */
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          use: "babel-loader",
+          exclude: /\/node_modules\//
+        },
+        {
+          test: /\.svg$/,
+          use: "binary-loader"
+        }
+      ]
+    },
 
-  /* Output */
-  output: {
-    path: path.join(__dirname, "dist"),
-    filename: "[name]/index.js",
-    libraryTarget: "commonjs2"
-  },
+    /* Output */
+    output: {
+      path: path.join(__dirname, "dist"),
+      filename: "[name]/index.js",
+      libraryTarget: "commonjs2"
+    },
 
-  /* Plugins */
-  plugins: [
+    /* Plugins */
+    plugins: [
 
-    /* Post-compilation hook to bundle sources with dependencies */
-    new EventHooksPlugin({
-      done: stats => {
-        Object.keys(stats.compilation.entrypoints).forEach(name => {
-          const entrypoint = stats.compilation.entrypoints[name]
-          entrypoint.chunks.forEach(chunk => {
+      /* Hack: The webpack development middleware sometimes goes into a loop on
+         macOS when starting for the first time. This is a quick fix until
+         this issue is resolved. See: http://bit.ly/2AsizEn */
+      new EventHooksPlugin({
+        "watch-run": (compiler, cb) => {
+          compiler.startTime += 10000
+          cb()
+        },
+        done: stats => {
+          stats.startTime -= 10000
+        }
+      }),
 
-            /* Create archive for each entrypoint */
-            const archive = archiver("zip", { zlib: { level: 9 } })
-            const zipfile = fs.createWriteStream(
-              path.join(__dirname, "dist", `${name}.zip`))
+      /* Post-compilation hook to bundle sources with dependencies */
+      new EventHooksPlugin({
+        done: stats => {
+          Object.keys(stats.compilation.entrypoints).forEach(name => {
+            const entrypoint = stats.compilation.entrypoints[name]
+            entrypoint.chunks.forEach(chunk => {
 
-            /* Iterate modules and include into archive if external */
-            chunk.forEachModule(module => {
-              module.dependencies.forEach(dependency => {
+              /* Create archive for each entrypoint */
+              const archive = archiver("zip", { zlib: { level: 9 } })
+              const zipfile = fs.createWriteStream(
+                path.join(__dirname, "dist", `${name}.zip`))
 
-                /* Bundle all non-native modules, except aws-sdk */
-                if (dependency.request && dependency.request !== "aws-sdk" &&
-                    dependency.request.match(/^[^.]/)) {
-                  const external = path.resolve(
-                    __dirname, "node_modules", dependency.request)
-                  if (fs.existsSync(external)) {
-                    archive.directory(external,
-                      path.join("node_modules", dependency.request))
+              /* Iterate modules and include into archive if external */
+              chunk.forEachModule(module => {
+                module.dependencies.forEach(dependency => {
 
-                    /* Bundle nested dependencies */
-                    resolve(external).forEach(subexternal => {
-                      archive.directory(subexternal,
-                        path.relative(__dirname, subexternal))
-                    })
+                  /* Bundle all non-native modules, except aws-sdk */
+                  if (dependency.request && dependency.request !== "aws-sdk" &&
+                      dependency.request.match(/^[^.]/)) {
+                    const external = path.resolve(
+                      __dirname, "node_modules", dependency.request)
+                    if (fs.existsSync(external)) {
+                      archive.directory(external,
+                        path.join("node_modules", dependency.request))
+
+                      /* Bundle nested dependencies */
+                      resolve(external).forEach(subexternal => {
+                        archive.directory(subexternal,
+                          path.relative(__dirname, subexternal))
+                      })
+                    }
                   }
-                }
+                })
               })
+
+              /* Append compiled sources to archive */
+              archive.directory(path.resolve(__dirname, "dist", name), false)
+
+              /* Finalize and write archive */
+              archive.pipe(zipfile)
+              archive.finalize()
             })
-
-            /* Append compiled sources to archive */
-            archive.directory(path.resolve(__dirname, "dist", name), false)
-
-            /* Finalize and write archive */
-            archive.pipe(zipfile)
-            archive.finalize()
           })
-        })
-      }
-    })
-  ],
-
-  /* External modules */
-  externals: [
-    externals()
-  ],
-
-  /* Module resolver */
-  resolve: {
-    modules: [
-      path.resolve(__dirname, "node_modules")
+        }
+      })
     ],
-    extensions: [".js"]
+
+    /* External modules */
+    externals: [
+      externals()
+    ],
+
+    /* Module resolver */
+    resolve: {
+      modules: [
+        path.resolve(__dirname, "node_modules")
+      ],
+      extensions: [".js"]
+    },
+
+    /* Sourcemaps */
+    devtool: !env || env.prod ? "inline-source-map" : ""
   }
+
+  /* Production compilation */
+  if (env && env.prod) {
+    config.plugins.push(
+
+      /* Beautify sources */
+      new webpack.optimize.UglifyJsPlugin({
+        beautify: true,
+        compress: false,
+        mangle: false,
+        output: {
+          comments: false,
+          indent_level: 2, // eslint-disable-line camelcase
+          width: 80
+        }
+      }))
+  }
+
+  /* We're good to go */
+  return config
 }

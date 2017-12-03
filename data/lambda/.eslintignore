@@ -19,7 +19,7 @@
 # IN THE SOFTWARE.
 
 # NPM
-**/node_modules/**
+/node_modules
 
 # Distribution files
-**/dist/**
+/dist

@@ -20,8 +20,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "babel-eslint": "^8.0.3",
-    "eslint": "^4.8.0",
     "git-hooks": "^1.1.9"
   }
 }

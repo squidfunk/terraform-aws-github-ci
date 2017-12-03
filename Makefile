@@ -28,29 +28,18 @@ all: lint | build
 .terraform:
 	terraform init
 
-# Install NPM dependencies
-node_modules:
-	npm install
-
-# -----------------------------------------------------------------------------
-# Targets
-# -----------------------------------------------------------------------------
-
-# Lambda functions
-data/lambda:
-	make -C data/lambda build
-
 # -----------------------------------------------------------------------------
 # Rules
 # -----------------------------------------------------------------------------
 
 # Build distribution files
-build: .terraform data/lambda
+build: .terraform
+	make -C data/lambda build
 
 # Lint source files
-lint: .terraform node_modules
+lint: .terraform
 	terraform validate -check-variables=false
-	$(shell npm bin)/eslint --max-warnings 0 .
+	make -C data/lambda lint
 
 # -----------------------------------------------------------------------------
 

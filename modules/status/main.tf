@@ -24,7 +24,7 @@
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${path.root}/aws-iam/policies/lambda.json")}"
+  template = "${file("${path.root}/files/aws-iam/policies/lambda.json")}"
 
   vars {
     bucket = "${var.bucket}"
@@ -41,7 +41,7 @@ resource "aws_iam_role" "lambda" {
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${path.root}/aws-iam/policies/assume-role/lambda.json")
+    file("${path.root}/files/aws-iam/policies/assume-role/lambda.json")
   }"
 }
 
@@ -67,10 +67,10 @@ resource "aws_iam_policy_attachment" "lambda" {
 
 # aws_cloudwatch_event_rule.status
 resource "aws_cloudwatch_event_rule" "status" {
-  name = "${var.namespace}-webhook-status"
+  name = "${var.namespace}-status"
 
   event_pattern = "${
-    file("${path.root}/aws-cloudwatch/rules/codebuild.json")
+    file("${path.root}/files/aws-cloudwatch/rules/codebuild.json")
   }"
 }
 
@@ -86,15 +86,15 @@ resource "aws_cloudwatch_event_target" "status" {
 
 # aws_lambda_function.status
 resource "aws_lambda_function" "status" {
-  function_name = "${var.namespace}-webhook-status"
+  function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.root}/aws-lambda/dist/status.zip"
+  filename      = "${path.root}/files/aws-lambda/dist/status.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.root}/aws-lambda/dist/status.zip"))
+    base64sha256(file("${path.root}/files/aws-lambda/dist/status.zip"))
   }"
 
   environment {

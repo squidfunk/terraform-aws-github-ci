@@ -49,7 +49,7 @@ data "template_file" "codebuild_source_location" {
 
 # data.template_file.codebuild_iam_policy.rendered
 data "template_file" "codebuild_iam_policy" {
-  template = "${file("${path.module}/aws-iam/policies/codebuild.json")}"
+  template = "${file("${path.module}/files/aws-iam/policies/codebuild.json")}"
 
   vars {
     bucket = "${aws_s3_bucket.codebuild.arn}"
@@ -66,7 +66,7 @@ resource "aws_iam_role" "codebuild" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    file("${path.module}/aws-iam/policies/assume-role/codebuild.json")
+    file("${path.module}/files/aws-iam/policies/assume-role/codebuild.json")
   }"
 }
 
@@ -100,7 +100,7 @@ resource "aws_s3_bucket" "codebuild" {
 resource "aws_s3_bucket_object" "codebuild" {
   bucket        = "${aws_s3_bucket.codebuild.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/aws-lambda/src/status/unknown.svg"
+  source        = "${path.module}/files/aws-lambda/assets/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"
@@ -150,12 +150,12 @@ resource "aws_codebuild_project" "codebuild" {
 }
 
 # -----------------------------------------------------------------------------
-# Modules: CloudWatch
+# Modules
 # -----------------------------------------------------------------------------
 
-# module.cloudwatch
-module "cloudwatch" {
-  source = "./aws-cloudwatch"
+# module.webhook
+module "webhook" {
+  source = "./modules/webhook"
 
   namespace = "${var.namespace}"
 
@@ -167,13 +167,9 @@ module "cloudwatch" {
   bucket = "${aws_s3_bucket.codebuild.bucket}"
 }
 
-# -----------------------------------------------------------------------------
-# Modules: SNS
-# -----------------------------------------------------------------------------
-
-# module.sns
-module "sns" {
-  source = "./aws-sns"
+# module.status
+module "status" {
+  source = "./modules/status"
 
   namespace = "${var.namespace}"
 

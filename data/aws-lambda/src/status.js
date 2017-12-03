@@ -23,9 +23,9 @@
 import AWS from "aws-sdk"
 import GitHub from "github"
 
-import errored from "./status/errored.svg"
-import failing from "./status/failing.svg"
-import passing from "./status/passing.svg"
+import errored from "../assets/errored.svg"
+import failing from "../assets/failing.svg"
+import passing from "../assets/passing.svg"
 
 /* ----------------------------------------------------------------------------
  * Constants

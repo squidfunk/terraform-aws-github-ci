@@ -97,8 +97,8 @@ module.exports = {
 
   /* Output */
   output: {
-    filename: "[name]/index.js",
     path: path.join(__dirname, "dist"),
+    filename: "[name]/index.js",
     libraryTarget: "commonjs2"
   },
 

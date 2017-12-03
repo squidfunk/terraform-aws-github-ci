@@ -34,8 +34,7 @@ node_modules
 npm-debug.log*
 
 # Distribution files except *.zip
-aws-lambda/dist/*
-!aws-lambda/dist/*.zip
+**/dist/**/*.js*
 
 # Coverage reports
 .nyc_output

@@ -36,22 +36,23 @@ const EventHooksPlugin = require("event-hooks-webpack-plugin")
  * Resolve module dependencies recursively
  *
  * @param {string} module - Module path
+ * @param {Array<string>} parents - Parent module paths
  *
  * @return {Array<string>} Paths of dependent modules
  */
-const resolve = module => {
-  console.log(module) // eslint-disable-line no-console
+const resolve = (module, ...parents) => {
   const metadata = require(path.resolve(module, "package.json"))
-  console.log(metadata) // eslint-disable-line no-console
   return Object.keys(metadata.dependencies || {}).reduce(
     (dependencies, name) => {
-      const dependency = path.resolve([module, __dirname].find(base => {
-        console.log(base, "node_modules", // eslint-disable-line no-console
-          name) // eslint-disable-line no-console
+      const dependency = path.resolve([
+        module, ...parents, __dirname
+      ].find(base => {
         return fs.existsSync(path.resolve(base, "node_modules", name))
       }), "node_modules", name)
-      console.log(dependency) // eslint-disable-line no-console
-      return [...dependencies, dependency, ...resolve(dependency)]
+      return [
+        ...dependencies, dependency,
+        ...resolve(dependency, module, ...parents)
+      ]
     }, [])
 }
 

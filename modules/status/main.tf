@@ -24,7 +24,7 @@
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${path.module}/../../data/iam/policies/lambda.json")}"
+  template = "${file("${var.shared}/iam/policies/lambda.json")}"
 
   vars {
     bucket = "${var.bucket}"
@@ -41,7 +41,7 @@ resource "aws_iam_role" "lambda" {
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${path.module}/../../data/iam/policies/assume-role/lambda.json")
+    file("${var.shared}/iam/policies/assume-role/lambda.json")
   }"
 }
 
@@ -70,7 +70,7 @@ resource "aws_cloudwatch_event_rule" "_" {
   name = "${var.namespace}-status"
 
   event_pattern = "${
-    file("${path.module}/../../data/cloudwatch/rules/codebuild.json")
+    file("${var.shared}/cloudwatch/rules/codebuild.json")
   }"
 }
 
@@ -89,12 +89,12 @@ resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${path.module}/../../data/lambda/dist/status.zip"
+  filename      = "${var.shared}/lambda/dist/status.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/../../data/lambda/dist/status.zip"))
+    base64sha256(file("${var.shared}/lambda/dist/status.zip"))
   }"
 
   environment {

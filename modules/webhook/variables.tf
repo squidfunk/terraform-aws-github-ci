@@ -27,6 +27,11 @@ variable "namespace" {
   description = "AWS resource namespace/prefix"
 }
 
+# var.shared
+variable "shared" {
+  description = "Path to shared data"
+}
+
 # -----------------------------------------------------------------------------
 # Variables: GitHub
 # -----------------------------------------------------------------------------

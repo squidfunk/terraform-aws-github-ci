@@ -50,7 +50,7 @@ data "template_file" "codebuild_iam_policy" {
   template = "${file("${path.module}/data/iam/policies/codebuild.json")}"
 
   vars {
-    bucket = "${aws_s3_bucket.codebuild.arn}"
+    bucket = "${aws_s3_bucket._.arn}"
   }
 }
 
@@ -88,15 +88,15 @@ resource "aws_iam_policy_attachment" "codebuild" {
 # Resources: S3
 # -----------------------------------------------------------------------------
 
-# aws_s3_bucket.codebuild
-resource "aws_s3_bucket" "codebuild" {
+# aws_s3_bucket._
+resource "aws_s3_bucket" "_" {
   bucket = "${coalesce(var.codebuild_bucket, var.namespace)}"
   acl    = "private"
 }
 
-# aws_s3_bucket_object.codebuild
-resource "aws_s3_bucket_object" "codebuild" {
-  bucket        = "${aws_s3_bucket.codebuild.bucket}"
+# aws_s3_bucket_object._
+resource "aws_s3_bucket_object" "_" {
+  bucket        = "${aws_s3_bucket._.bucket}"
   key           = "${var.github_repository}/status.svg"
   source        = "${path.module}/data/lambda/assets/unknown.svg"
   acl           = "public-read"
@@ -113,8 +113,8 @@ resource "aws_s3_bucket_object" "codebuild" {
 # Resources: CodeBuild
 # -----------------------------------------------------------------------------
 
-# aws_codebuild_project.codebuild
-resource "aws_codebuild_project" "codebuild" {
+# aws_codebuild_project._
+resource "aws_codebuild_project" "_" {
   count = "${length(var.codebuild_project) == 0 ? 1 : 0}"
 
   name = "${var.github_repository}"
@@ -140,7 +140,7 @@ resource "aws_codebuild_project" "codebuild" {
 
   artifacts {
     type           = "S3"
-    location       = "${aws_s3_bucket.codebuild.bucket}"
+    location       = "${aws_s3_bucket._.bucket}"
     name           = "${var.github_repository}"
     namespace_type = "BUILD_ID"
     packaging      = "ZIP"
@@ -162,7 +162,7 @@ module "webhook" {
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
 
-  bucket = "${aws_s3_bucket.codebuild.bucket}"
+  bucket = "${aws_s3_bucket._.bucket}"
 }
 
 # module.status
@@ -176,5 +176,5 @@ module "status" {
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
 
-  bucket = "${aws_s3_bucket.codebuild.bucket}"
+  bucket = "${aws_s3_bucket._.bucket}"
 }

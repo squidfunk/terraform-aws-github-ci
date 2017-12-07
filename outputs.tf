@@ -34,13 +34,13 @@ output "codebuild_service_role_arn" {
 
 # output.codebuild_bucket
 output "codebuild_bucket" {
-  value = "${aws_s3_bucket.codebuild.bucket}"
+  value = "${aws_s3_bucket._.bucket}"
 }
 
 # output.codebuild_badge_url
 output "codebuild_badge_url" {
   value = "https://s3.amazonaws.com/${
-    aws_s3_bucket.codebuild.bucket
+    aws_s3_bucket._.bucket
   }/${
     var.github_repository
   }/status.svg"

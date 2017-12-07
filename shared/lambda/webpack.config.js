@@ -40,12 +40,17 @@ const EventHooksPlugin = require("event-hooks-webpack-plugin")
  * @return {Array<string>} Paths of dependent modules
  */
 const resolve = module => {
+  console.log(module) // eslint-disable-line no-console
   const metadata = require(path.resolve(module, "package.json"))
+  console.log(metadata) // eslint-disable-line no-console
   return Object.keys(metadata.dependencies || {}).reduce(
     (dependencies, name) => {
       const dependency = path.resolve([module, __dirname].find(base => {
+        console.log(base, "node_modules", // eslint-disable-line no-console
+          name) // eslint-disable-line no-console
         return fs.existsSync(path.resolve(base, "node_modules", name))
       }), "node_modules", name)
+      console.log(dependency) // eslint-disable-line no-console
       return [...dependencies, dependency, ...resolve(dependency)]
     }, [])
 }

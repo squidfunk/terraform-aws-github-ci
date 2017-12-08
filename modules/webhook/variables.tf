@@ -60,7 +60,7 @@ variable "github_reporter" {
 # Variables: S3
 # -----------------------------------------------------------------------------
 
-# var.bucket
-variable "bucket" {
-  description = "S3 bucket"
+# var.bucket_arn
+variable "bucket_arn" {
+  description = "S3 bucket ARN"
 }

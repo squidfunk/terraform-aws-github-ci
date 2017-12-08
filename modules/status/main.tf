@@ -27,7 +27,7 @@ data "template_file" "lambda_iam_policy" {
   template = "${file("${var.share}/iam/policies/lambda.json")}"
 
   vars {
-    bucket = "${var.bucket}"
+    bucket = "${var.bucket_arn}"
   }
 }
 
@@ -101,7 +101,7 @@ resource "aws_lambda_function" "_" {
     variables = {
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
       GITHUB_REPORTER    = "${var.github_reporter}"
-      CODEBUILD_BUCKET   = "${var.bucket}"
+      CODEBUILD_BUCKET   = "${var.bucket_name}"
     }
   }
 }

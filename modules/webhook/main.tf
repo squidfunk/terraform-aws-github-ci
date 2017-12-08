@@ -41,7 +41,7 @@ data "template_file" "lambda_iam_policy" {
   template = "${file("${var.share}/iam/policies/lambda.json")}"
 
   vars {
-    bucket = "${var.bucket}"
+    bucket = "${var.bucket_arn}"
   }
 }
 

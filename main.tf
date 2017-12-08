@@ -163,7 +163,8 @@ module "status" {
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
 
-  bucket = "${aws_s3_bucket._.bucket}"
+  bucket_arn  = "${aws_s3_bucket._.arn}"
+  bucket_name = "${aws_s3_bucket._.bucket}"
 }
 
 # module.webhook
@@ -178,5 +179,5 @@ module "webhook" {
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
 
-  bucket = "${aws_s3_bucket._.bucket}"
+  bucket_arn = "${aws_s3_bucket._.arn}"
 }

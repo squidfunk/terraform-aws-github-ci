@@ -47,7 +47,7 @@ data "template_file" "codebuild_source_location" {
 
 # data.template_file.codebuild_iam_policy.rendered
 data "template_file" "codebuild_iam_policy" {
-  template = "${file("${path.module}/shared/iam/policies/codebuild.json")}"
+  template = "${file("${path.module}/share/iam/policies/codebuild.json")}"
 
   vars {
     bucket = "${aws_s3_bucket._.arn}"
@@ -64,7 +64,7 @@ resource "aws_iam_role" "codebuild" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    file("${path.module}/shared/iam/policies/assume-role/codebuild.json")
+    file("${path.module}/share/iam/policies/assume-role/codebuild.json")
   }"
 }
 
@@ -98,7 +98,7 @@ resource "aws_s3_bucket" "_" {
 resource "aws_s3_bucket_object" "_" {
   bucket        = "${aws_s3_bucket._.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/shared/lambda/assets/unknown.svg"
+  source        = "${path.module}/share/lambda/assets/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"
@@ -151,12 +151,12 @@ resource "aws_codebuild_project" "_" {
 # Modules
 # -----------------------------------------------------------------------------
 
-# module.webhook
-module "webhook" {
-  source = "./modules/webhook"
+# module.status
+module "status" {
+  source = "./modules/status"
 
   namespace = "${var.namespace}"
-  shared    = "${path.module}/shared"
+  share     = "${path.module}/share"
 
   github_owner       = "${var.github_owner}"
   github_repository  = "${var.github_repository}"
@@ -166,12 +166,12 @@ module "webhook" {
   bucket = "${aws_s3_bucket._.bucket}"
 }
 
-# module.status
-module "status" {
-  source = "./modules/status"
+# module.webhook
+module "webhook" {
+  source = "./modules/webhook"
 
   namespace = "${var.namespace}"
-  shared    = "${path.module}/shared"
+  share     = "${path.module}/share"
 
   github_owner       = "${var.github_owner}"
   github_repository  = "${var.github_repository}"

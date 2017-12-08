@@ -38,7 +38,7 @@ data "aws_region" "_" {
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${var.shared}/iam/policies/lambda.json")}"
+  template = "${file("${var.share}/iam/policies/lambda.json")}"
 
   vars {
     bucket = "${var.bucket}"
@@ -47,7 +47,7 @@ data "template_file" "lambda_iam_policy" {
 
 # data.template_file.webhook_iam_policy.rendered
 data "template_file" "webhook_iam_policy" {
-  template = "${file("${var.shared}/iam/policies/webhook.json")}"
+  template = "${file("${var.share}/iam/policies/webhook.json")}"
 
   vars {
     topic = "${aws_sns_topic._.arn}"
@@ -64,7 +64,7 @@ resource "aws_iam_role" "lambda" {
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${var.shared}/iam/policies/assume-role/lambda.json")
+    file("${var.share}/iam/policies/assume-role/lambda.json")
   }"
 }
 
@@ -130,12 +130,12 @@ resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-webhook"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs6.10"
-  filename      = "${var.shared}/lambda/dist/webhook.zip"
+  filename      = "${var.share}/lambda/dist/webhook.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${var.shared}/lambda/dist/webhook.zip"))
+    base64sha256(file("${var.share}/lambda/dist/webhook.zip"))
   }"
 
   environment {

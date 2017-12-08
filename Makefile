@@ -34,12 +34,12 @@ all: lint | build
 
 # Build distribution files
 build: .terraform
-	make -C shared/lambda build
+	make -C share/lambda build
 
 # Lint source files
 lint: .terraform
 	terraform validate -check-variables=false
-	make -C shared/lambda lint
+	make -C share/lambda lint
 
 # -----------------------------------------------------------------------------
 

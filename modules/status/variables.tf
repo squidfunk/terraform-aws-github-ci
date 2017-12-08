@@ -27,8 +27,8 @@ variable "namespace" {
   description = "AWS resource namespace/prefix"
 }
 
-# var.shared
-variable "shared" {
+# var.share
+variable "share" {
   description = "Path to shared data"
 }
 

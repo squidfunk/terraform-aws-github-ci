@@ -21,24 +21,28 @@
 all: lint | build
 
 # -----------------------------------------------------------------------------
-# Prerequisites
+# Targets
 # -----------------------------------------------------------------------------
 
-# Install Terraform dependencies
-.terraform:
-	terraform init
+# Git pre-commit hook
+.git/hooks/pre-commit:
+	ln -fs ../../.githooks/pre-commit $@
 
 # -----------------------------------------------------------------------------
 # Rules
 # -----------------------------------------------------------------------------
 
+# Initialize repository
+init: .git/hooks/pre-commit
+
+# -----------------------------------------------------------------------------
+
 # Build distribution files
-build: .terraform
+build:
 	make -C share/lambda build
 
 # Lint source files
-lint: .terraform
-	terraform validate -check-variables=false
+lint:
 	make -C share/lambda lint
 
 # -----------------------------------------------------------------------------

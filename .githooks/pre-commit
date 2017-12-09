@@ -58,7 +58,7 @@ git checkout -- .
 
 # Filter staged files and create short list for files to lint
 STAGE=$(git diff --cached --name-only --diff-filter=ACMR)
-FILES=$(echo ${STAGE} | grep --include=*.{js,tf} "")
+FILES=$(echo ${STAGE} | grep --include=*.js "")
 
 # Run linter if the commit contains files that require it
 if [ "$FILES" ]; then

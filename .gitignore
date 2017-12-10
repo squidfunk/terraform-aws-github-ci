@@ -36,6 +36,9 @@ npm-debug.log*
 # Distribution files except *.zip
 **/dist/**/*.js*
 
-# Coverage reports
+# Tests
+tests/plans/*.tmp
+
+# Logs and coverage reports
 .nyc_output
 coverage

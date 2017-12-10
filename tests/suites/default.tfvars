@@ -18,30 +18,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-language: node_js
-sudo: false
+# -----------------------------------------------------------------------------
+# Variables
+# -----------------------------------------------------------------------------
 
-# Node.js version
-node_js: 8
+# var.github_owner
+github_owner = "owner"
 
-# Limit clone depth to 5, to speed up build
-git:
-  depth: 5
+# var.github_repository
+github_repository = "repository"
 
-# Cache dependencies
-cache:
-  directories:
-    - node_modules
-
-# Install dependencies
-install:
-  - curl -fSL "https://releases.hashicorp.com/terraform/0.11.1/terraform_0.11.1_linux_amd64.zip" -o terraform.zip
-  - sudo unzip terraform.zip -d /opt/terraform
-  - sudo ln -s /opt/terraform/terraform /usr/bin/terraform
-  - rm -f terraform.zip
-
-# Perform build and release
-script:
-  - make lint
-  - make build
-  - make test
+# var.github_oauth_token
+github_oauth_token = "oauth-token"

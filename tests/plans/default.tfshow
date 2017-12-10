@@ -1,0 +1,272 @@
+<= module.default.data.template_file.codebuild_iam_policy
+      id:                                            <computed>
+      rendered:                                      <computed>
+      template:                                      "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"logs:CreateLogGroup\",\n        \"logs:CreateLogStream\",\n        \"logs:PutLogEvents\"\n      ],\n      \"Resource\": \"arn:aws:logs:*:*:*\"\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:GetBucketVersioning\",\n        \"s3:GetObject\",\n        \"s3:GetObjectVersion\",\n        \"s3:PutObject\"\n      ],\n      \"Resource\": [\n        \"${bucket}/*\",\n        \"${bucket}\"\n      ]\n    }\n  ]\n}\n"
+      vars.%:                                        <computed>
+
+  + module.default.aws_codebuild_project._
+      id:                                            <computed>
+      artifacts.#:                                   "1"
+      artifacts.537882814.location:                  "github-ci"
+      artifacts.537882814.name:                      "repository"
+      artifacts.537882814.namespace_type:            "BUILD_ID"
+      artifacts.537882814.packaging:                 "ZIP"
+      artifacts.537882814.path:                      ""
+      artifacts.537882814.type:                      "S3"
+      build_timeout:                                 "5"
+      description:                                   <computed>
+      encryption_key:                                <computed>
+      environment.#:                                 "1"
+      environment.4086057901.compute_type:           "BUILD_GENERAL1_SMALL"
+      environment.4086057901.environment_variable.#: <computed>
+      environment.4086057901.image:                  "aws/codebuild/ubuntu-base:14.04"
+      environment.4086057901.privileged_mode:        "false"
+      environment.4086057901.type:                   "LINUX_CONTAINER"
+      name:                                          "repository"
+      service_role:                                  "${aws_iam_role.codebuild.arn}"
+      source.#:                                      "1"
+      source.3514078923.auth.#:                      "1"
+      source.3514078923.auth.263797155.resource:     "oauth-token"
+      source.3514078923.auth.263797155.type:         "OAUTH"
+      source.3514078923.buildspec:                   ""
+      source.3514078923.location:                    "https://github.com/owner/repository.git"
+      source.3514078923.type:                        "GITHUB"
+
+  + module.default.aws_iam_policy.codebuild
+      id:                                            <computed>
+      arn:                                           <computed>
+      name:                                          "github-ci-codebuild"
+      path:                                          "/github-ci/codebuild/"
+      policy:                                        "${data.template_file.codebuild_iam_policy.rendered}"
+
+  + module.default.aws_iam_policy_attachment.codebuild
+      id:                                            <computed>
+      name:                                          "github-ci-codebuild"
+      policy_arn:                                    "${aws_iam_policy.codebuild.arn}"
+      roles.#:                                       <computed>
+
+  + module.default.aws_iam_role.codebuild
+      id:                                            <computed>
+      arn:                                           <computed>
+      assume_role_policy:                            "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": {\n    \"Effect\": \"Allow\",\n    \"Action\": \"sts:AssumeRole\",\n    \"Principal\": {\n      \"Service\": \"codebuild.amazonaws.com\"\n    }\n  }\n}\n"
+      create_date:                                   <computed>
+      force_detach_policies:                         "false"
+      name:                                          "github-ci-codebuild"
+      path:                                          "/github-ci/codebuild/"
+      unique_id:                                     <computed>
+
+  + module.default.aws_s3_bucket._
+      id:                                            <computed>
+      acceleration_status:                           <computed>
+      acl:                                           "private"
+      arn:                                           <computed>
+      bucket:                                        "github-ci"
+      bucket_domain_name:                            <computed>
+      force_destroy:                                 "false"
+      hosted_zone_id:                                <computed>
+      region:                                        <computed>
+      request_payer:                                 <computed>
+      versioning.#:                                  <computed>
+      website_domain:                                <computed>
+      website_endpoint:                              <computed>
+
+  + module.default.aws_s3_bucket_object._
+      id:                                            <computed>
+      acl:                                           "public-read"
+      bucket:                                        "github-ci"
+      cache_control:                                 "no-cache, no-store, must-revalidate"
+      content_type:                                  "image/svg+xml"
+      etag:                                          <computed>
+      key:                                           "repository/status.svg"
+      server_side_encryption:                        <computed>
+      source:                                        "./.terraform/modules/7b8e3db19fe3b3ee1881ed2bf5841834/share/lambda/assets/unknown.svg"
+      storage_class:                                 <computed>
+      version_id:                                    <computed>
+
+ <= module.default.module.status.data.template_file.lambda_iam_policy
+      id:                                            <computed>
+      rendered:                                      <computed>
+      template:                                      "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"logs:CreateLogGroup\",\n        \"logs:CreateLogStream\",\n        \"logs:PutLogEvents\"\n      ],\n      \"Resource\": \"arn:aws:logs:*:*:*\"\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:PutObject\",\n        \"s3:PutObjectAcl\"\n      ],\n      \"Resource\": [\n        \"${bucket}/*\",\n        \"${bucket}\"\n      ]\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"codebuild:StartBuild\"\n      ],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n"
+      vars.%:                                        <computed>
+
+  + module.default.module.status.aws_cloudwatch_event_rule._
+      id:                                            <computed>
+      arn:                                           <computed>
+      event_pattern:                                 "{\"detail\":{\"completed-phase\":[\"SUBMITTED\",\"INSTALL\",\"BUILD\",\"FINALIZING\"],\"completed-phase-status\":[\"SUCCEEDED\",\"STOPPED\",\"FAILED\",\"FAULT\",\"TIMED_OUT\"]},\"detail-type\":[\"CodeBuild Build Phase Change\"],\"source\":[\"aws.codebuild\"]}"
+      is_enabled:                                    "true"
+      name:                                          "github-ci-status"
+
+  + module.default.module.status.aws_cloudwatch_event_target._
+      id:                                            <computed>
+      arn:                                           "${aws_lambda_function._.arn}"
+      rule:                                          "github-ci-status"
+      target_id:                                     <computed>
+
+  + module.default.module.status.aws_iam_policy.lambda
+      id:                                            <computed>
+      arn:                                           <computed>
+      name:                                          "github-ci-lambda-status"
+      path:                                          "/github-ci/lambda/"
+      policy:                                        "${data.template_file.lambda_iam_policy.rendered}"
+
+  + module.default.module.status.aws_iam_policy_attachment.lambda
+      id:                                            <computed>
+      name:                                          "github-ci-lambda-status"
+      policy_arn:                                    "${aws_iam_policy.lambda.arn}"
+      roles.#:                                       <computed>
+
+  + module.default.module.status.aws_iam_role.lambda
+      id:                                            <computed>
+      arn:                                           <computed>
+      assume_role_policy:                            "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": {\n    \"Effect\": \"Allow\",\n    \"Action\": \"sts:AssumeRole\",\n    \"Principal\": {\n      \"Service\": \"lambda.amazonaws.com\"\n    }\n  }\n}\n"
+      create_date:                                   <computed>
+      force_detach_policies:                         "false"
+      name:                                          "github-ci-lambda-status"
+      path:                                          "/github-ci/lambda/"
+      unique_id:                                     <computed>
+
+  + module.default.module.status.aws_lambda_function._
+      id:                                            <computed>
+      arn:                                           <computed>
+      environment.#:                                 "1"
+      environment.0.variables.%:                     "3"
+      environment.0.variables.CODEBUILD_BUCKET:      "github-ci"
+      environment.0.variables.GITHUB_OAUTH_TOKEN:    "oauth-token"
+      environment.0.variables.GITHUB_REPORTER:       "AWS CodeBuild"
+      filename:                                      "./.terraform/modules/7b8e3db19fe3b3ee1881ed2bf5841834/share/lambda/dist/status.zip"
+      function_name:                                 "github-ci-status"
+      handler:                                       "index.default"
+      invoke_arn:                                    <computed>
+      last_modified:                                 <computed>
+      memory_size:                                   "128"
+      publish:                                       "false"
+      qualified_arn:                                 <computed>
+      role:                                          "${aws_iam_role.lambda.arn}"
+      runtime:                                       "nodejs6.10"
+      source_code_hash:                              "3whOvfTjDjrzpbqJuPg84MTJDW0iYNAVcBgKRiztrA4="
+      timeout:                                       "10"
+      tracing_config.#:                              <computed>
+      version:                                       <computed>
+
+  + module.default.module.status.aws_lambda_permission._
+      id:                                            <computed>
+      action:                                        "lambda:InvokeFunction"
+      function_name:                                 "${aws_lambda_function._.arn}"
+      principal:                                     "events.amazonaws.com"
+      source_arn:                                    "${aws_cloudwatch_event_rule._.arn}"
+      statement_id:                                  "AllowExecutionFromCloudWatch"
+
+ <= module.default.module.webhook.data.template_file.lambda_iam_policy
+      id:                                            <computed>
+      rendered:                                      <computed>
+      template:                                      "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"logs:CreateLogGroup\",\n        \"logs:CreateLogStream\",\n        \"logs:PutLogEvents\"\n      ],\n      \"Resource\": \"arn:aws:logs:*:*:*\"\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:PutObject\",\n        \"s3:PutObjectAcl\"\n      ],\n      \"Resource\": [\n        \"${bucket}/*\",\n        \"${bucket}\"\n      ]\n    },\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"codebuild:StartBuild\"\n      ],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n"
+      vars.%:                                        <computed>
+
+ <= module.default.module.webhook.data.template_file.webhook_iam_policy
+      id:                                            <computed>
+      rendered:                                      <computed>
+      template:                                      "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"sns:Publish\"\n      ],\n      \"Resource\": \"${topic}\"\n    }\n  ]\n}\n"
+      vars.%:                                        <computed>
+
+  + module.default.module.webhook.aws_iam_access_key._
+      id:                                            <computed>
+      encrypted_secret:                              <computed>
+      key_fingerprint:                               <computed>
+      secret:                                        <computed>
+      ses_smtp_password:                             <computed>
+      status:                                        <computed>
+      user:                                          "github-ci-webhook"
+
+  + module.default.module.webhook.aws_iam_policy.lambda
+      id:                                            <computed>
+      arn:                                           <computed>
+      name:                                          "github-ci-lambda-webhook"
+      path:                                          "/github-ci/lambda/"
+      policy:                                        "${data.template_file.lambda_iam_policy.rendered}"
+
+  + module.default.module.webhook.aws_iam_policy_attachment.lambda
+      id:                                            <computed>
+      name:                                          "github-ci-lambda-webhook"
+      policy_arn:                                    "${aws_iam_policy.lambda.arn}"
+      roles.#:                                       <computed>
+
+  + module.default.module.webhook.aws_iam_role.lambda
+      id:                                            <computed>
+      arn:                                           <computed>
+      assume_role_policy:                            "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": {\n    \"Effect\": \"Allow\",\n    \"Action\": \"sts:AssumeRole\",\n    \"Principal\": {\n      \"Service\": \"lambda.amazonaws.com\"\n    }\n  }\n}\n"
+      create_date:                                   <computed>
+      force_detach_policies:                         "false"
+      name:                                          "github-ci-lambda-webhook"
+      path:                                          "/github-ci/lambda/"
+      unique_id:                                     <computed>
+
+  + module.default.module.webhook.aws_iam_user._
+      id:                                            <computed>
+      arn:                                           <computed>
+      force_destroy:                                 "false"
+      name:                                          "github-ci-webhook"
+      path:                                          "/github-ci/"
+      unique_id:                                     <computed>
+
+  + module.default.module.webhook.aws_iam_user_policy._
+      id:                                            <computed>
+      name:                                          "github-ci-webhook"
+      policy:                                        "${data.template_file.webhook_iam_policy.rendered}"
+      user:                                          "github-ci-webhook"
+
+  + module.default.module.webhook.aws_lambda_function._
+      id:                                            <computed>
+      arn:                                           <computed>
+      environment.#:                                 "1"
+      environment.0.variables.%:                     "2"
+      environment.0.variables.GITHUB_OAUTH_TOKEN:    "oauth-token"
+      environment.0.variables.GITHUB_REPORTER:       "AWS CodeBuild"
+      filename:                                      "./.terraform/modules/7b8e3db19fe3b3ee1881ed2bf5841834/share/lambda/dist/webhook.zip"
+      function_name:                                 "github-ci-webhook"
+      handler:                                       "index.default"
+      invoke_arn:                                    <computed>
+      last_modified:                                 <computed>
+      memory_size:                                   "128"
+      publish:                                       "false"
+      qualified_arn:                                 <computed>
+      role:                                          "${aws_iam_role.lambda.arn}"
+      runtime:                                       "nodejs6.10"
+      source_code_hash:                              "ISQwYO18eleKvj9pp+TgzGOkdoAvwwrpExv+wsNNfH4="
+      timeout:                                       "10"
+      tracing_config.#:                              <computed>
+      version:                                       <computed>
+
+  + module.default.module.webhook.aws_lambda_permission._
+      id:                                            <computed>
+      action:                                        "lambda:InvokeFunction"
+      function_name:                                 "${aws_lambda_function._.arn}"
+      principal:                                     "sns.amazonaws.com"
+      source_arn:                                    "${aws_sns_topic._.arn}"
+      statement_id:                                  "AllowExecutionFromSNS"
+
+  + module.default.module.webhook.aws_sns_topic._
+      id:                                            <computed>
+      arn:                                           <computed>
+      name:                                          "github-ci-webhook"
+      policy:                                        <computed>
+
+  + module.default.module.webhook.aws_sns_topic_subscription._
+      id:                                            <computed>
+      arn:                                           <computed>
+      confirmation_timeout_in_minutes:               "1"
+      endpoint:                                      "${aws_lambda_function._.arn}"
+      endpoint_auto_confirms:                        "false"
+      protocol:                                      "lambda"
+      raw_message_delivery:                          "false"
+      topic_arn:                                     "${aws_sns_topic._.arn}"
+
+  + module.default.module.webhook.github_repository_webhook._
+      id:                                            <computed>
+      active:                                        "true"
+      configuration.%:                               <computed>
+      events.#:                                      "2"
+      events.1597642340:                             "push"
+      events.2342231791:                             "pull_request"
+      name:                                          "amazonsns"
+      repository:                                    "repository"
+      url:                                           <computed>

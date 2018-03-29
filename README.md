@@ -49,8 +49,11 @@ and apply the configuration from the root folder with:
 terraform apply \
   -var github_owner=<owner> \
   -var github_repository=<repository> \
-  -var github_oauth_token=<oauth-token>
+  -var github_oauth_token=<oauth-token> \
+  -var namespace=<something-unique-for-you>
 ```
+
+The unique namespace is used for naming resources, specifically important for S3 buckets which are globally unique.
 
 Now, when you push to `master`, or create a pull request, CodeBuild will
 automatically build the commit and report the status back to GitHub.
@@ -105,6 +108,11 @@ The following variables can be configured:
 - **Description**: GitHub OAuth token for repository access
 - **Default**: `none`
 
+#### `namespace`
+
+- **Description**: AWS resource namespace/prefix, *only lowercase alphanumeric characters and hyphens allowed*
+- **Default**: `"github-ci"`
+
 ### Optional
 
 #### `github_reporter`
@@ -136,11 +144,6 @@ The following variables can be configured:
 
 - **Description**: S3 bucket to store status badge and artifacts
 - **Default**: `"github-ci"` (equal to namespace)
-
-#### `namespace`
-
-- **Description**: AWS resource namespace/prefix
-- **Default**: `"github-ci"`
 
 ### Default project
 

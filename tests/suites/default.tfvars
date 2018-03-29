@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright (c) 2017 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,46 +19,14 @@
 # IN THE SOFTWARE.
 
 # -----------------------------------------------------------------------------
-# Constants
+# Variables
 # -----------------------------------------------------------------------------
 
-# Patch file to store working tree
-PATCH=".working-tree.patch"
+# var.github_owner
+github_owner = "owner"
 
-# -----------------------------------------------------------------------------
-# Functions
-# -----------------------------------------------------------------------------
+# var.github_repository
+github_repository = "repository"
 
-# Re-create working tree from patch file and preserve exit code
-function cleanup {
-  EXIT_CODE=$?
-  if [ -f "${PATCH}" ]; then
-    git apply "${PATCH}" 2> /dev/null
-    rm "${PATCH}"
-  fi
-  exit $EXIT_CODE
-}
-
-# -----------------------------------------------------------------------------
-# Handlers
-# -----------------------------------------------------------------------------
-
-# Register signal handlers
-trap cleanup EXIT SIGINT SIGHUP
-
-# -----------------------------------------------------------------------------
-# Program
-# -----------------------------------------------------------------------------
-
-# Remove any changes from the working tree that are not going to be committed
-git diff > "${PATCH}"
-git checkout -- .
-
-# Filter staged files and create short list for files to lint
-STAGE=$(git diff --cached --name-only --diff-filter=ACMR)
-FILES=$(echo ${STAGE} | grep --include=*.{js,tf} "")
-
-# Run linter if the commit contains files that require it
-if [ "$FILES" ]; then
-  make lint
-fi
+# var.github_oauth_token
+github_oauth_token = "oauth-token"

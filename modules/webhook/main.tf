@@ -45,6 +45,8 @@ data "template_file" "lambda_iam_policy" {
   }
 }
 
+# -----------------------------------------------------------------------------
+
 # data.template_file.webhook_iam_policy.rendered
 data "template_file" "webhook_iam_policy" {
   template = "${file("${var.share}/iam/policies/webhook.json")}"

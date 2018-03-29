@@ -18,39 +18,45 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-all: lint | build
+all: run
 
 # -----------------------------------------------------------------------------
 # Targets
 # -----------------------------------------------------------------------------
 
-# Set up git hook
-.git/hooks/%: .githooks/%
-	ln -fs ../../$< $@
+# Retrieve modules and plugins
+.terraform:
+	terraform init
+
+# Update baseline plan
+plans/%.tfshow: plans/%.tfshow.tmp
+	cp $< $@
+
+# Create plan from configuration
+plans/%.tfshow.tmp: suites/%.tfvars .terraform
+	terraform plan -var-file=$< -out $@.bin 1>/dev/null
+	terraform show -no-color $@.bin | \
+		sed -e "s?$(shell pwd)?.?g" > $@ && rm $@.bin
+
+# Pseudo target to calculate the difference in plans
+plans/%._diff_: plans/%.tfshow.tmp
+	test -s $(basename $<) && git diff --no-index $(basename $<) $<
 
 # -----------------------------------------------------------------------------
 # Rules
 # -----------------------------------------------------------------------------
 
-# Initialize repository
-init: $(subst .githooks, .git/hooks, $(shell find .githooks))
+# Create plans for all suites and compare them against the baseline
+run: $(patsubst suites/%.tfvars, plans/%._diff_, $(shell find suites/*))
 
-# -----------------------------------------------------------------------------
-
-# Build distribution files
-build:
-	make -C share/lambda build
-
-# Lint source files
-lint:
-	make -C share/lambda lint
-
-# Run regression tests
-test:
-	make -C tests run
+# Update baseline plans
+update: $(patsubst plans/%.tmp, plans/%, $(shell find plans/*.tmp))
 
 # -----------------------------------------------------------------------------
 
 # Special targets
-.PHONY: .FORCE build lint
+.PHONY: .FORCE test
 .FORCE:
+
+# Don't delete non-matching plans
+.PRECIOUS: plans/%.tfshow.tmp

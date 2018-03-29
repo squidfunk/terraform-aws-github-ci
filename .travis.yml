@@ -44,3 +44,4 @@ install:
 script:
   - make lint
   - make build
+  - make test

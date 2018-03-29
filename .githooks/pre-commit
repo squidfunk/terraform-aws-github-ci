@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) 2017 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,39 +20,47 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-all: lint | build
-
 # -----------------------------------------------------------------------------
-# Targets
+# Constants
 # -----------------------------------------------------------------------------
 
-# Set up git hook
-.git/hooks/%: .githooks/%
-	ln -fs ../../$< $@
+# Patch file to store working tree
+PATCH=".working-tree.patch"
 
 # -----------------------------------------------------------------------------
-# Rules
+# Functions
 # -----------------------------------------------------------------------------
 
-# Initialize repository
-init: $(subst .githooks, .git/hooks, $(shell find .githooks))
+# Re-create working tree from patch file and preserve exit code
+function cleanup {
+  EXIT_CODE=$?
+  if [ -f "${PATCH}" ]; then
+    git apply "${PATCH}" 2> /dev/null
+    rm "${PATCH}"
+  fi
+  exit $EXIT_CODE
+}
 
 # -----------------------------------------------------------------------------
-
-# Build distribution files
-build:
-	make -C share/lambda build
-
-# Lint source files
-lint:
-	make -C share/lambda lint
-
-# Run regression tests
-test:
-	make -C tests run
-
+# Handlers
 # -----------------------------------------------------------------------------
 
-# Special targets
-.PHONY: .FORCE build lint
-.FORCE:
+# Register signal handlers
+trap cleanup EXIT SIGINT SIGHUP
+
+# -----------------------------------------------------------------------------
+# Program
+# -----------------------------------------------------------------------------
+
+# Remove any changes from the working tree that are not going to be committed
+git diff > "${PATCH}"
+git checkout -- .
+
+# Filter staged files and create short list for files to lint
+STAGE=$(git diff --cached --name-only --diff-filter=ACMR)
+FILES=$(echo ${STAGE} | grep --include=*.js "")
+
+# Run linter if the commit contains files that require it
+if [ "$FILES" ]; then
+  make lint
+fi

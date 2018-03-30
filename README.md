@@ -31,7 +31,7 @@ generated and hosted on S3.
 Building with this CI server is unbelievably cheap - you only pay what you use.
 Pricings starts at 0,5 ct per build minute, and AWS CodeBuild offers 100 free
 build minutes every month. The price for the other services (Lambda, SNS, S3
-and CloudWatch) are neglectable and should only add a few cents to your monthly
+and CloudWatch) are negligible and should only add a few cents to your monthly
 bill. Compare that to the $69 that services like Travis cost every month,
 regardless of how much you use them.
 

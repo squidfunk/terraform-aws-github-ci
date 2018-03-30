@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Martin Donath <martin.donath@squidfunk.com>
+# Copyright (c) 2017-2018 Martin Donath <martin.donath@squidfunk.com>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
@@ -49,7 +49,7 @@ clean:
 
 # Lint source files
 lint: node_modules
-	$(shell npm bin)/eslint --max-warnings 0 .
+	$(shell npm bin)/tslint -p tsconfig.json "{src,tests}/**/*.ts"
 
 # Run unit tests
 test: node_modules

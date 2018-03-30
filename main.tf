@@ -81,7 +81,7 @@ resource "aws_iam_policy_attachment" "codebuild" {
   name = "${var.namespace}-codebuild"
 
   policy_arn = "${aws_iam_policy.codebuild.arn}"
-  roles      = ["${aws_iam_role.codebuild.id}"]
+  roles      = ["${aws_iam_role.codebuild.name}"]
 }
 
 # -----------------------------------------------------------------------------

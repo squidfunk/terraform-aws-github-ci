@@ -37,7 +37,7 @@ data "template_file" "lambda_iam_policy" {
 
 # aws_iam_role.lambda
 resource "aws_iam_role" "lambda" {
-  name = "${var.namespace}-lambda-status"
+  name = "${var.namespace}-status-lambda"
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
@@ -47,7 +47,7 @@ resource "aws_iam_role" "lambda" {
 
 # aws_iam_policy.lambda
 resource "aws_iam_policy" "lambda" {
-  name = "${var.namespace}-lambda-status"
+  name = "${var.namespace}-status-lambda"
   path = "/${var.namespace}/lambda/"
 
   policy = "${data.template_file.lambda_iam_policy.rendered}"
@@ -55,10 +55,10 @@ resource "aws_iam_policy" "lambda" {
 
 # aws_iam_policy_attachment.lambda
 resource "aws_iam_policy_attachment" "lambda" {
-  name = "${var.namespace}-lambda-status"
+  name = "${var.namespace}-status-lambda"
 
   policy_arn = "${aws_iam_policy.lambda.arn}"
-  roles      = ["${aws_iam_role.lambda.id}"]
+  roles      = ["${aws_iam_role.lambda.name}"]
 }
 
 # -----------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+terraform-aws-github-ci-0.4.0 (2017-03-30)
+
+  * Refactored complete code base into TypeScript
+
 terraform-aws-github-ci-0.3.0 (2017-12-03)
 
   * Fixed compatibility errors with Terraform 0.11

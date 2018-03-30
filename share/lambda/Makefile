@@ -33,7 +33,7 @@ node_modules:
 # -----------------------------------------------------------------------------
 
 # Build library for distribution
-dist: $(shell find src) .babelrc webpack.config.js
+dist: $(shell find src) .babelrc webpack.config.ts
 	$(shell npm bin)/webpack --env.prod
 
 # -----------------------------------------------------------------------------
@@ -51,21 +51,8 @@ clean:
 lint: node_modules
 	$(shell npm bin)/tslint -p tsconfig.json "{src,tests}/**/*.ts"
 
-# Run unit tests
-test: node_modules
-	$(shell npm bin)/cross-env NODE_ENV=test \
-	 	$(shell npm bin)/nyc --reporter=lcov --reporter=text \
-	    	$(shell npm bin)/babel-node tests/index.js
-
-# Run unit tests in watch mode
-watch: node_modules
-	$(shell npm bin)/cross-env NODE_ENV=development \
- 		$(shell npm bin)/nodemon --quiet \
-    		--watch src --watch tests/unit \
-    		--exec $(shell npm bin)/babel-node tests/index.js
-
 # -----------------------------------------------------------------------------
 
 # Special targets
-.PHONY: .FORCE build clean lint test watch
+.PHONY: .FORCE build clean lint
 .FORCE:

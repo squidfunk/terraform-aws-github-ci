@@ -80,7 +80,7 @@ the terminal.
 
 **Note**: the OAuth-token is currently mandatory, because Terraform doesn't
 support conditional blocks inside resources. However, this feature is currently
-[being implemented][5] and should be released shortly.
+[being implemented][5] and should be released shortly. You need to go to [CodeBuild](https://eu-west-1.console.aws.amazon.com/codebuild/home) in your region, manually start creating a new project and choose GitHub as the **Source provider**, allowing AWS to authorize to your account.
 
   [2]: http://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.htm
   [3]: http://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-getting-started.html

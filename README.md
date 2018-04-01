@@ -54,15 +54,16 @@ repository and apply the configuration from the root folder with:
 
 ``` bash
 terraform apply \
+  -var namespace=<namespace> \
   -var github_owner=<owner> \
   -var github_repository=<repository> \
-  -var github_oauth_token=<oauth-token> \
-  -var namespace=<unique-identifier>
+  -var github_oauth_token=<oauth-token>
 ```
 
 All resources are prefixed with the value specified as `namespace`. If the S3
 bucket name (see below) is not explicitly set, it's set to the given `namespace`
-which means there must not already exist and S3 bucket with the same name.
+which means there must not already exist an S3 bucket with the same name. This
+is a common source of error.
 
 Now, when you push to `master`, or create a pull request, CodeBuild will
 automatically build the commit and report the status back to GitHub.
@@ -79,6 +80,7 @@ module "github_ci" {
   source  = "github.com/squidfunk/terraform-aws-github-ci"
   version = "0.3.0"
 
+  namespace          = "<namespace>"
   github_owner       = "<owner>"
   github_repository  = "<repository>"
   github_oauth_token = "<oauth-token>"
@@ -102,6 +104,11 @@ The following variables can be configured:
 
 ### Required
 
+#### `namespace`
+
+- **Description**: AWS resource namespace/prefix (lowercase alphanumeric)
+- **Default**: `none`
+
 #### `github_owner`
 
 - **Description**: GitHub repository owner
@@ -116,11 +123,6 @@ The following variables can be configured:
 
 - **Description**: GitHub OAuth token for repository access
 - **Default**: `none`
-
-#### `namespace`
-
-- **Description**: AWS resource namespace/prefix (lowercase alphanumeric)
-- **Default**: `"github-ci"`
 
 ### Optional
 
@@ -154,6 +156,30 @@ The following variables can be configured:
 - **Description**: S3 bucket to store status badge and artifacts
 - **Default**: `"github-ci"` (equal to namespace)
 
+### Outputs
+
+The following outputs are exported:
+
+#### `codebuild_service_role_name`
+
+- **Description**: CodeBuild service role name
+
+#### `codebuild_service_role_arn`
+
+- **Description**: CodeBuild service role ARN
+
+#### `codebuild_bucket`
+
+- **Description**: CodeBuild artifacts bucket name
+
+#### `codebuild_badge_url`
+
+- **Description**: CodeBuild status badge URL
+
+#### `codebuild_url`
+
+- **Description**: CodeBuild project URL
+
 ### Default project
 
 If you need more control over the CodeBuild project, you can pass the name of
@@ -169,7 +195,7 @@ resource "aws_codebuild_project" "codebuild" {
 
   source {
     type     = "GITHUB"
-    location = "..."
+    location = "https://github.com/$${owner}/$${repository}.git"
 
     auth {
       type     = "OAUTH"

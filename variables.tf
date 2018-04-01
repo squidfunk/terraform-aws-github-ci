@@ -25,7 +25,6 @@
 # var.namespace
 variable "namespace" {
   description = "AWS resource namespace/prefix"
-  default     = "github-ci"
 }
 
 # -----------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+terraform-aws-github-ci-0.4.1 (2017-04-01)
+
+  * Fixed #5: Removed default for namespace variable
+
 terraform-aws-github-ci-0.4.0 (2017-03-30)
 
   * Refactored complete code base into TypeScript

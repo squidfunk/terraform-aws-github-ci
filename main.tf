@@ -123,8 +123,9 @@ resource "aws_codebuild_project" "_" {
   service_role  = "${aws_iam_role.codebuild.arn}"
 
   source {
-    type     = "GITHUB"
-    location = "${data.template_file.codebuild_source_location.rendered}"
+    type      = "GITHUB"
+    location  = "${data.template_file.codebuild_source_location.rendered}"
+    buildspec = "${var.codebuild_buildspec}"
 
     auth {
       type     = "OAUTH"

@@ -79,3 +79,9 @@ variable "codebuild_bucket" {
   description = "S3 bucket to store status badge and artifacts"
   default     = ""
 }
+
+# var.codebuild_buildspec
+variable "codebuild_buildspec" {
+  description = "The build spec declaration to use for this build project's related builds."
+  default     = ""
+}

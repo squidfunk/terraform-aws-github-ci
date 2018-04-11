@@ -156,6 +156,11 @@ The following variables can be configured:
 - **Description**: S3 bucket to store status badge and artifacts
 - **Default**: `"github-ci"` (equal to namespace)
 
+#### `codebuild_buildspec`
+
+- **Description**: The build spec declaration to use for this build project's related builds.
+- **Default**: `""`
+
 ### Outputs
 
 The following outputs are exported:

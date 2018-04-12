@@ -31,7 +31,8 @@ git:
 # Cache dependencies
 cache:
   directories:
-    - node_modules
+    - modules/status/lambda/node_modules
+    - modules/webhook/lambda/node_modules
 
 # Install dependencies
 install:

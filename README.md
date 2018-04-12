@@ -135,7 +135,8 @@ The following variables can be configured:
 
 - **Description**: CodeBuild project name (won't create [default project][6])
 - **Default**: `""`
-- **Conflicts with**: `codebuild_compute_type`, `codebuild_image`
+- **Conflicts with**: `codebuild_compute_type`, `codebuild_image`,
+  `codebuild_buildspec`
 
   [6]: #default-project
 
@@ -151,15 +152,16 @@ The following variables can be configured:
 - **Default**: `"aws/codebuild/ubuntu-base:14.04"`
 - **Conflicts with**: `codebuild_project`
 
+#### `codebuild_buildspec`
+
+- **Description**: Build specification declaration file ([file format][2])
+- **Default**: `"buildspec.yml"` (at repository root)
+- **Conflicts with**: `codebuild_project`
+
 #### `codebuild_bucket`
 
 - **Description**: S3 bucket to store status badge and artifacts
-- **Default**: `"github-ci"` (equal to namespace)
-
-#### `codebuild_buildspec`
-
-- **Description**: The build spec declaration to use for this build project's related builds.
-- **Default**: `""`
+- **Default**: `"${var.namespace}"` (equal to namespace)
 
 ### Outputs
 

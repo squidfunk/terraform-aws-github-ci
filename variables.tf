@@ -74,14 +74,14 @@ variable "codebuild_image" {
   default     = "aws/codebuild/ubuntu-base:14.04"
 }
 
-# var.codebuild_bucket
-variable "codebuild_bucket" {
-  description = "S3 bucket to store status badge and artifacts"
+# var.codebuild_buildspec
+variable "codebuild_buildspec" {
+  description = "Build specification declaration file"
   default     = ""
 }
 
-# var.codebuild_buildspec
-variable "codebuild_buildspec" {
-  description = "The build spec declaration to use for this build project's related builds."
+# var.codebuild_bucket
+variable "codebuild_bucket" {
+  description = "S3 bucket to store status badge and artifacts"
   default     = ""
 }

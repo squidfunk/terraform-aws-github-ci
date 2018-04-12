@@ -78,7 +78,7 @@ Include and configure this module in your Terraform configuration:
 ``` hcl
 module "github_ci" {
   source  = "github.com/squidfunk/terraform-aws-github-ci"
-  version = "0.3.0"
+  version = "0.5.1"
 
   namespace          = "<namespace>"
   github_owner       = "<owner>"

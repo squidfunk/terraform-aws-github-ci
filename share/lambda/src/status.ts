@@ -212,7 +212,7 @@ export default (event: CodeBuildPhaseChange, _: Context, cb: Callback) => {
   if (state && description) {
     github.repos.createStatus({
       owner, repo, sha, state, description,
-      target_url: url, // eslint-disable-line camelcase
+      target_url: url,
       context: process.env.GITHUB_REPORTER
     })
 

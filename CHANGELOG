@@ -1,3 +1,7 @@
+terraform-aws-github-ci-0.5.1 (2017-04-12)
+
+  * Fixed broken update for build status badges
+
 terraform-aws-github-ci-0.5.0 (2017-04-12)
 
   * Added support to configure build specification file location

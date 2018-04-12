@@ -28,14 +28,3 @@
 # Terraform state
 *.tfstate
 *.tfstate.backup
-
-# NPM
-node_modules
-npm-debug.log*
-
-# Distribution files except *.zip
-**/dist/**/*.js*
-
-# Coverage reports
-.nyc_output
-coverage

@@ -18,7 +18,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-all: clean lint | build
+all: lint clean | build
 
 # -----------------------------------------------------------------------------
 # Prerequisites
@@ -33,8 +33,11 @@ node_modules:
 # -----------------------------------------------------------------------------
 
 # Build library for distribution
-dist: $(shell find src) .babelrc webpack.config.ts
-	$(shell npm bin)/webpack --env.prod
+dist: $(shell find src) tsconfig.json
+	$(shell npm bin)/tsc -p tsconfig.json
+	@(cd dist && cp ../package*.json . && cp -r ../src/assets . && \
+		npm install --production && rm -rf package*.json etc && \
+		zip -rq index.zip * && rm -rf assets node_modules *.js)
 
 # -----------------------------------------------------------------------------
 # Rules
@@ -45,7 +48,7 @@ build: node_modules dist
 
 # Clean distribution files
 clean:
-	rm -rf dist
+	rm -rf coverage dist
 
 # Lint source files
 lint: node_modules
@@ -54,5 +57,5 @@ lint: node_modules
 # -----------------------------------------------------------------------------
 
 # Special targets
-.PHONY: .FORCE build clean lint
+.PHONY: .FORCE build clean lint test watch
 .FORCE:

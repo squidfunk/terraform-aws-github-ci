@@ -45,10 +45,10 @@ data "template_file" "codebuild_source_location" {
 
 # data.template_file.codebuild_iam_policy.rendered
 data "template_file" "codebuild_iam_policy" {
-  template = "${file("${path.module}/share/iam/policies/codebuild.json")}"
+  template = "${file("${path.module}/iam/policies/codebuild.json")}"
 
   vars {
-    bucket = "${aws_s3_bucket._.arn}"
+    bucket = "${aws_s3_bucket._.bucket}"
   }
 }
 
@@ -62,7 +62,7 @@ resource "aws_iam_role" "codebuild" {
   path = "/${var.namespace}/codebuild/"
 
   assume_role_policy = "${
-    file("${path.module}/share/iam/policies/assume-role/codebuild.json")
+    file("${path.module}/iam/policies/assume-role/codebuild.json")
   }"
 }
 
@@ -96,7 +96,7 @@ resource "aws_s3_bucket" "_" {
 resource "aws_s3_bucket_object" "_" {
   bucket        = "${aws_s3_bucket._.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/share/lambda/assets/unknown.svg"
+  source        = "${path.module}/share/assets/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"
@@ -155,15 +155,13 @@ module "status" {
   source = "./modules/status"
 
   namespace = "${var.namespace}"
-  share     = "${path.module}/share"
 
   github_owner       = "${var.github_owner}"
   github_repository  = "${var.github_repository}"
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
 
-  bucket_arn  = "${aws_s3_bucket._.arn}"
-  bucket_name = "${aws_s3_bucket._.bucket}"
+  bucket = "${aws_s3_bucket._.bucket}"
 }
 
 # module.webhook
@@ -171,12 +169,9 @@ module "webhook" {
   source = "./modules/webhook"
 
   namespace = "${var.namespace}"
-  share     = "${path.module}/share"
 
   github_owner       = "${var.github_owner}"
   github_repository  = "${var.github_repository}"
   github_oauth_token = "${var.github_oauth_token}"
   github_reporter    = "${var.github_reporter}"
-
-  bucket_arn = "${aws_s3_bucket._.arn}"
 }

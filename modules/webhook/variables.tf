@@ -27,11 +27,6 @@ variable "namespace" {
   description = "AWS resource namespace/prefix"
 }
 
-# var.share
-variable "share" {
-  description = "Path to shared data"
-}
-
 # -----------------------------------------------------------------------------
 # Variables: GitHub
 # -----------------------------------------------------------------------------
@@ -54,13 +49,4 @@ variable "github_oauth_token" {
 # var.github_reporter
 variable "github_reporter" {
   description = "GitHub commit status reporter"
-}
-
-# -----------------------------------------------------------------------------
-# Variables: S3
-# -----------------------------------------------------------------------------
-
-# var.bucket_arn
-variable "bucket_arn" {
-  description = "S3 bucket ARN"
 }

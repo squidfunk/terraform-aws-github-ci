@@ -39,11 +39,13 @@ init: .git/hooks/pre-commit
 
 # Build distribution files
 build:
-	make -C share/lambda build
+	make -C modules/status/lambda build
+	make -C modules/webhook/lambda build
 
 # Lint source files
 lint:
-	make -C share/lambda lint
+	make -C modules/status/lambda lint
+	make -C modules/webhook/lambda lint
 
 # -----------------------------------------------------------------------------
 

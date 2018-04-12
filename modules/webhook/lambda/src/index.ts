@@ -20,9 +20,10 @@
  * IN THE SOFTWARE.
  */
 
+import * as GitHub from "github"
+
 import { Callback, Context } from "aws-lambda"
 import { CodeBuild, SNS } from "aws-sdk"
-import * as GitHub from "github"
 
 /* ----------------------------------------------------------------------------
  * Types

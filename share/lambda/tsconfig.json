@@ -3,9 +3,10 @@
     "alwaysStrict": true,
     "baseUrl": ".",
     "lib": [
-      "es2015",
+      "es2017",
       "esnext"
     ],
+    "module": "commonjs",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -14,13 +15,20 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "dist",
+    "paths": {
+      "~/*": ["src/*"],
+      "_/*": ["tests/*"]
+    },
     "preserveConstEnums": true,
     "removeComments": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "stripInternal": true,
-    "target": "es5"
+    "target": "es2017"
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
     "node_modules"
   ]

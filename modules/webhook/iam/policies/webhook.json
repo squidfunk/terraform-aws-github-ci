@@ -6,7 +6,7 @@
       "Action": [
         "sns:Publish"
       ],
-      "Resource": "${topic}"
+      "Resource": "${topic_arn}"
     }
   ]
 }

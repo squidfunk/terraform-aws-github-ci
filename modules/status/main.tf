@@ -24,10 +24,10 @@
 
 # data.template_file.lambda_iam_policy.rendered
 data "template_file" "lambda_iam_policy" {
-  template = "${file("${var.share}/iam/policies/lambda.json")}"
+  template = "${file("${path.module}/iam/policies/lambda.json")}"
 
   vars {
-    bucket = "${var.bucket_arn}"
+    bucket = "${var.bucket}"
   }
 }
 
@@ -35,13 +35,13 @@ data "template_file" "lambda_iam_policy" {
 # Resources: IAM
 # -----------------------------------------------------------------------------
 
-# aws_iam_role.lambda
+# aws_iam_role.lambdaw
 resource "aws_iam_role" "lambda" {
   name = "${var.namespace}-status-lambda"
   path = "/${var.namespace}/lambda/"
 
   assume_role_policy = "${
-    file("${var.share}/iam/policies/assume-role/lambda.json")
+    file("${path.module}/iam/policies/assume-role/lambda.json")
   }"
 }
 
@@ -70,7 +70,7 @@ resource "aws_cloudwatch_event_rule" "_" {
   name = "${var.namespace}-status"
 
   event_pattern = "${
-    file("${var.share}/cloudwatch/rules/codebuild.json")
+    file("${path.module}/cloudwatch/rules/codebuild.json")
   }"
 }
 
@@ -88,20 +88,20 @@ resource "aws_cloudwatch_event_target" "_" {
 resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
-  runtime       = "nodejs6.10"
-  filename      = "${var.share}/lambda/dist/status.zip"
+  runtime       = "nodejs8.10"
+  filename      = "${path.module}/lambda/dist/index.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${var.share}/lambda/dist/status.zip"))
+    base64sha256(file("${path.module}/lambda/dist/index.zip"))
   }"
 
   environment {
     variables = {
       GITHUB_OAUTH_TOKEN = "${var.github_oauth_token}"
       GITHUB_REPORTER    = "${var.github_reporter}"
-      CODEBUILD_BUCKET   = "${var.bucket_name}"
+      CODEBUILD_BUCKET   = "${var.bucket}"
     }
   }
 }

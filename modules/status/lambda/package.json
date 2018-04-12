@@ -1,0 +1,37 @@
+{
+  "name": "terraform-aws-github-ci.status-lambda",
+  "version": "0.0.0",
+  "description": "A GitHub CI server using AWS CodeBuild",
+  "keywords": [],
+  "homepage": "https://github.com/squidfunk/terraform-aws-github-ci/",
+  "bugs": {
+    "url": "https://github.com/squidfunk/terraform-aws-github-ci/",
+    "email": "martin.donath@squidfunk.com"
+  },
+  "private": true,
+  "author": {
+    "name": "Martin Donath",
+    "email": "martin.donath@squidfunk.com"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/squidfunk/terraform-aws-github-ci.git"
+  },
+  "scripts": {
+    "build": "make build",
+    "clean": "make clean",
+    "lint": "make lint"
+  },
+  "dependencies": {
+    "github": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "0.0.34",
+    "@types/node": "^9.6.1",
+    "aws-sdk": "^2.137.0",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1"
+  }
+}

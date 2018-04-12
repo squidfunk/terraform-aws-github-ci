@@ -18,44 +18,44 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-# -----------------------------------------------------------------------------
-# Variables: General
-# -----------------------------------------------------------------------------
-
-# var.namespace
-variable "namespace" {
-  description = "AWS resource namespace/prefix"
-}
+all: lint clean | build
 
 # -----------------------------------------------------------------------------
-# Variables: GitHub
+# Prerequisites
 # -----------------------------------------------------------------------------
 
-# var.github_owner
-variable "github_owner" {
-  description = "GitHub repository owner"
-}
-
-# var.github_repository
-variable "github_repository" {
-  description = "GitHub repository name"
-}
-
-# var.github_oauth_token
-variable "github_oauth_token" {
-  description = "GitHub OAuth token for repository access"
-}
-
-# var.github_reporter
-variable "github_reporter" {
-  description = "GitHub commit status reporter"
-}
+# Install dependencies
+node_modules:
+	npm install
 
 # -----------------------------------------------------------------------------
-# Variables: S3
+# Targets
 # -----------------------------------------------------------------------------
 
-# var.bucket
-variable "bucket" {
-  description = "S3 bucket to store status badge"
-}
+# Build library for distribution
+dist: $(shell find src) tsconfig.json
+	$(shell npm bin)/tsc -p tsconfig.json
+	@(cd dist && cp ../package*.json . && \
+		npm install --production && rm -rf package*.json etc && \
+		zip -rq index.zip * && rm -rf assets node_modules *.js)
+
+# -----------------------------------------------------------------------------
+# Rules
+# -----------------------------------------------------------------------------
+
+# Build distribution files
+build: node_modules dist
+
+# Clean distribution files
+clean:
+	rm -rf coverage dist
+
+# Lint source files
+lint: node_modules
+	$(shell npm bin)/tslint -p tsconfig.json "{src,tests}/**/*.ts"
+
+# -----------------------------------------------------------------------------
+
+# Special targets
+.PHONY: .FORCE build clean lint test watch
+.FORCE:

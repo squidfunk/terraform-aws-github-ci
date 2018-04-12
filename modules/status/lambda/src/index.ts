@@ -20,14 +20,11 @@
  * IN THE SOFTWARE.
  */
 
+import * as fs from "fs"
 import * as GitHub from "github"
 
 import { Callback, Context } from "aws-lambda"
 import { S3 } from "aws-sdk"
-
-import * as errored from "../assets/errored.svg"
-import * as failing from "../assets/failing.svg"
-import * as passing from "../assets/passing.svg"
 
 /* ----------------------------------------------------------------------------
  * Types
@@ -146,9 +143,9 @@ const mapping: CodeBuildGitHubMapping = {
  * GitHub build status to badge mapping
  */
 const badges: GitHubBadgeMapping = {
-  success: passing,
-  failure: failing,
-  error: errored
+  success: fs.readFileSync("./assets/success.svg", "utf8"),
+  failure: fs.readFileSync("./assets/failing.svg", "utf8"),
+  error:   fs.readFileSync("./assets/errored.svg", "utf8")
 }
 
 /* ----------------------------------------------------------------------------

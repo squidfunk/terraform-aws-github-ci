@@ -154,7 +154,7 @@ The following variables can be configured:
 
 #### `codebuild_buildspec`
 
-- **Description**: Build specification declaration file ([file format][2])
+- **Description**: Build specification file location ([file format][2])
 - **Default**: `"buildspec.yml"` (at repository root)
 - **Conflicts with**: `codebuild_project`
 

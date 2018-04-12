@@ -76,7 +76,7 @@ variable "codebuild_image" {
 
 # var.codebuild_buildspec
 variable "codebuild_buildspec" {
-  description = "Build specification declaration file"
+  description = "Build specification file location"
   default     = ""
 }
 

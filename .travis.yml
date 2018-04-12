@@ -36,8 +36,8 @@ cache:
 
 # Install dependencies
 install:
-    - npm install --prefix modules/status/lambda
-    - npm install --prefix modules/webhook/lambda
+  - npm install --prefix modules/status/lambda
+  - npm install --prefix modules/webhook/lambda
 
 # Perform build and release
 script:

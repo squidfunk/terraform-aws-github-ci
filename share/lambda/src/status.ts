@@ -25,9 +25,9 @@ import * as GitHub from "github"
 import { Callback, Context } from "aws-lambda"
 import { S3 } from "aws-sdk"
 
-import errored from "../assets/errored.svg"
-import failing from "../assets/failing.svg"
-import passing from "../assets/passing.svg"
+import * as errored from "../assets/errored.svg"
+import * as failing from "../assets/failing.svg"
+import * as passing from "../assets/passing.svg"
 
 /* ----------------------------------------------------------------------------
  * Types

@@ -59,7 +59,15 @@ git checkout -- .
 # Filter staged files and create short list for files to lint
 FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.ts$")
 
-# Run linter if the commit contains files that require it
-if [ "$FILES" ]; then
+# Run check and print indicator
+if [ -n "${FILES}" ]; then
+  echo -e "\x1B[33mLinting affected files:\x1B[0m"
+  for FILE in $FILES; do
+    echo "  ${FILE}"
+  done
+  echo
+
+  # Run linter for affected packages in parallel
   make lint
+  exit $?
 fi

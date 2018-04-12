@@ -90,7 +90,7 @@ if (process.env.GITHUB_OAUTH_TOKEN)
  */
 export default (event: GitHubWebhookEvent, _: Context, cb: Callback) => {
   event.Records.reduce((promise, record) => {
-    const type = record.Sns.MessageAttributes!["X-Github-Event"].StringValue
+    const type = (record.Sns.MessageAttributes!["X-Github-Event"] as any).Value
     const message: GitHubSourceChange = JSON.parse(record.Sns.Message)
 
     /* Retrieve commit SHA and reference */

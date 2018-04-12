@@ -1,3 +1,7 @@
+terraform-aws-github-ci-0.4.2 (2017-04-12)
+
+  * Fixed #10: Webhook fails due to invalid reference
+
 terraform-aws-github-ci-0.4.1 (2017-04-01)
 
   * Fixed #5: Removed default for namespace variable
@@ -18,7 +22,7 @@ terraform-aws-github-ci-0.2.0 (2017-12-02)
 
 terraform-aws-github-ci-0.1.1 (2017-11-15)
 
-  * Fixed missing lambda distribution files
+  * Fixed missing distribution files
   * Fixed invalid source location for initial status badge
 
 terraform-aws-github-ci-0.1.0 (2017-11-15)

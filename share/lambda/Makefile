@@ -36,6 +36,10 @@ node_modules:
 dist-pre_:
 dist-post_:
 
+# Clean hooks
+clean-pre_:
+clean-post_:
+
 # -----------------------------------------------------------------------------
 # Targets
 # -----------------------------------------------------------------------------
@@ -51,6 +55,14 @@ dist.zip: | dist-pre dist dist-post
 		zip -rq ../$@ * && rm -rf node_modules)
 
 # -----------------------------------------------------------------------------
+# Default rules
+# -----------------------------------------------------------------------------
+
+# Clean distribution files
+clean_:
+	rm -rf coverage dist dist.zip
+
+# -----------------------------------------------------------------------------
 # Rules
 # -----------------------------------------------------------------------------
 
@@ -58,8 +70,7 @@ dist.zip: | dist-pre dist dist-post
 build: node_modules | dist.zip
 
 # Clean distribution files
-clean:
-	rm -rf coverage dist dist.zip
+clean: | clean-pre clean_ clean-post
 
 # Lint source files
 lint: node_modules

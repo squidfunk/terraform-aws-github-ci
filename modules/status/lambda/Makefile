@@ -19,3 +19,11 @@
 # IN THE SOFTWARE.
 
 include ../../../share/lambda/Makefile
+
+# -----------------------------------------------------------------------------
+# Target hooks
+# -----------------------------------------------------------------------------
+
+# Include assets in distribution files
+dist-post:
+	@(cd dist && cp -r ../src/badges .)

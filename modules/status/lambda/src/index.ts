@@ -200,7 +200,9 @@ export default (event: CodeBuildPhaseChange, _: Context, cb: Callback) => {
       [state, description] = ["success", "Build successful"]
 
   /* Resolve build reference and run URL */
-  const ref = info.environment["environment-variables"][0].value
+  const ref = info.environment["environment-variables"].find(variable => {      // TODO: needs some refactoring
+    return variable.name === "GIT_BRANCH"
+  })!.value
   const run = event.detail["build-id"].split(":").pop()
   const url = `https://console.aws.amazon.com/codebuild/home?region=${
     process.env.AWS_REGION}#/builds/${repo}:${run}/view/new`

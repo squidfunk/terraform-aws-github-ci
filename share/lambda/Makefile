@@ -29,6 +29,14 @@ node_modules:
 	npm install
 
 # -----------------------------------------------------------------------------
+# Target hooks
+# -----------------------------------------------------------------------------
+
+# Pre- and post hooks for distribution
+dist-pre_:
+dist-post_:
+
+# -----------------------------------------------------------------------------
 # Targets
 # -----------------------------------------------------------------------------
 
@@ -37,30 +45,30 @@ dist: $(shell find src) tsconfig.json
 	$(shell npm bin)/tsc -p tsconfig.json
 
 # Build archive for distribution
-dist.zip: dist
-	@(rm -f $@ && cd $< && cp ../package*.json . && \
+dist.zip: | dist-pre dist dist-post
+	@(rm -f $@ && cd dist && cp ../package*.json . && \
 		npm install --production && rm -rf package*.json etc && \
 		zip -rq ../$@ * && rm -rf node_modules)
 
 # -----------------------------------------------------------------------------
-# Default rules
+# Rules
 # -----------------------------------------------------------------------------
 
 # Build distribution files
-build_: node_modules dist.zip
+build: node_modules | dist.zip
 
 # Clean distribution files
-clean_:
+clean:
 	rm -rf coverage dist dist.zip
 
 # Lint source files
-lint_: node_modules
+lint: node_modules
 	$(shell npm bin)/tslint -p tsconfig.json "{src,tests}/**/*.ts"
 
 # -----------------------------------------------------------------------------
 
 # Special targets
-.PHONY: .FORCE build_ clean_ lint_
+.PHONY: .FORCE build clean lint
 .FORCE:
 
 # -----------------------------------------------------------------------------

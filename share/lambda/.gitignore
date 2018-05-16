@@ -23,8 +23,7 @@
 /npm-debug.log*
 
 # Distribution files
-/dist/**
-!/dist/index.zip
+/dist
 
 # Coverage reports
 /.nyc_output

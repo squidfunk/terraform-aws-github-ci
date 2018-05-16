@@ -42,6 +42,11 @@ build:
 	make -C modules/status/lambda build
 	make -C modules/webhook/lambda build
 
+# Clean distribution files
+clean:
+	make -C modules/status/lambda clean
+	make -C modules/webhook/lambda clean
+
 # Lint source files
 lint:
 	make -C modules/status/lambda lint

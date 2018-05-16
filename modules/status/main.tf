@@ -89,12 +89,12 @@ resource "aws_lambda_function" "_" {
   function_name = "${var.namespace}-status"
   role          = "${aws_iam_role.lambda.arn}"
   runtime       = "nodejs8.10"
-  filename      = "${path.module}/lambda/dist/index.zip"
+  filename      = "${path.module}/lambda/dist.zip"
   handler       = "index.default"
   timeout       = 10
 
   source_code_hash = "${
-    base64sha256(file("${path.module}/lambda/dist/index.zip"))
+    base64sha256(file("${path.module}/lambda/dist.zip"))
   }"
 
   environment {

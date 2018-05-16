@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  */
 
+import * as fs from "fs"
 import * as GitHub from "github"
 
 import { Callback, Context } from "aws-lambda"
@@ -142,7 +143,7 @@ const mapping: CodeBuildGitHubMapping = {
  * GitHub build status to badge mapping
  */
 const badges: GitHubBadgeMapping = {
-  success: "./badges/success",
+  success: "./badges/passing",
   failure: "./badges/failing",
   error:   "./badges/errored"
 }
@@ -219,7 +220,7 @@ export default (event: CodeBuildPhaseChange, _: Context, cb: Callback) => {
             s3.putObject({
               Bucket: process.env.CODEBUILD_BUCKET!,
               Key: `${repo}/status.svg`,
-              Body: require(badges[state!]),
+              Body: fs.readFileSync(badges[state!], "utf8"),
               ACL: "public-read",
               CacheControl: "no-cache, no-store, must-revalidate",
               ContentType: "image/svg+xml"

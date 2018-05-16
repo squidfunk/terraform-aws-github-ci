@@ -17,24 +17,5 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#
+
 include ../../../share/lambda/Makefile
-
-# -----------------------------------------------------------------------------
-# Targets
-# -----------------------------------------------------------------------------
-
-# Inline badges, because Lambda cannot read from the file system
-%.ts: %.svg
-	@ echo "export = \"$(shell cat $< | sed 's/"/\\\\\\"/g')\"" > $@
-
-# -----------------------------------------------------------------------------
-# Hooks
-# -----------------------------------------------------------------------------
-
-# Build inlined badges
-dist-pre: $(patsubst %.svg, %.ts, $(shell find src/badges/*.svg))
-
-# Clean inlined badges
-clean-pre:
-	rm -rf src/badges/*.ts

@@ -143,9 +143,9 @@ const mapping: CodeBuildGitHubMapping = {
  * GitHub build status to badge mapping
  */
 const badges: GitHubBadgeMapping = {
-  success: "./badges/passing",
-  failure: "./badges/failing",
-  error:   "./badges/errored"
+  success: "./badges/passing.svg",
+  failure: "./badges/failing.svg",
+  error:   "./badges/errored.svg"
 }
 
 /* ----------------------------------------------------------------------------

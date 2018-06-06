@@ -11,8 +11,8 @@
 
 # Terraform AWS GitHub CI
 
-A Terraform module to setup a GitHub CI server with pull request and build
-status support using AWS CodeBuild.
+A Terraform module to setup a serverless GitHub CI build environment with pull
+request and build status support using AWS CodeBuild.
 
 ## Architecture
 
@@ -29,11 +29,11 @@ generated and hosted on S3.
 ### Cost
 
 Building with this CI server is unbelievably cheap - you only pay what you use.
-Pricings starts at 0,5 ct per build minute, and AWS CodeBuild offers 100 free
-build minutes every month. The price for the other services (Lambda, SNS, S3
-and CloudWatch) are negligible and should only add a few cents to your monthly
-bill. Compare that to the $69 that services like Travis cost every month,
-regardless of how much you use them.
+Pricings starts at **$ 0,005 per build minute**, and AWS CodeBuild offers 100
+free build minutes every month. The price for the other services (Lambda, SNS,
+S3 and CloudWatch) are negligible and should only add a few cents to your
+monthly bill. Compare that to the $ 69 that services like Travis cost every
+month, regardless of how much you use them.
 
 ## Usage
 
@@ -41,39 +41,15 @@ You need an AWS and GitHub account and a repository you want to be built. The
 repository must specify a `buildspec.yml` which is documented [here][2]. First,
 you need to go to the [CodeBuild][3] dashboard in your region, manually create
 a new project and choose GitHub as the **Source provider**, allowing AWS to
-authorize your account.
+authorize your account. Next, [set up your AWS credentials][4] and
+[install Terraform][5] if you haven't got it available already.
 
   [2]: http://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.htm
   [3]: https://console.aws.amazon.com/codebuild/home
-
-### Standalone
-
-If you want to get started straight away and have no experience in Terraform,
-just [set up your AWS credentials][4], [install Terraform][5], clone the
-repository and apply the configuration from the root folder with:
-
-``` bash
-terraform apply \
-  -var namespace=<namespace> \
-  -var github_owner=<owner> \
-  -var github_repository=<repository> \
-  -var github_oauth_token=<oauth-token>
-```
-
-All resources are prefixed with the value specified as `namespace`. If the S3
-bucket name (see below) is not explicitly set, it's set to the given `namespace`
-which means there must not already exist an S3 bucket with the same name. This
-is a common source of error.
-
-Now, when you push to `master`, or create a pull request, CodeBuild will
-automatically build the commit and report the status back to GitHub.
-
   [4]: http://docs.aws.amazon.com/de_de/cli/latest/userguide/cli-chap-getting-started.html
   [5]: https://www.terraform.io/downloads.html
 
-### Module
-
-Include and configure this module in your Terraform configuration:
+Next, add the following module to your Terraform configuration and apply it:
 
 ``` hcl
 module "github_ci" {
@@ -87,14 +63,20 @@ module "github_ci" {
 }
 ```
 
-All resources (including the S3 bucket) are created through this module. After
-applying your configuration, a status badge can be added to your project's
-README using the `codebuild_badge_url` and `codebuild_url` outputs printed to
-the terminal.
+All resources are prefixed with the value specified as `namespace`. If the S3
+bucket name (see below) is not explicitly set, it's set to the given `namespace`
+which means there must not already exist an S3 bucket with the same name. This
+is a common source of error.
 
-**Note**: the OAuth-token is currently mandatory, because Terraform doesn't
-support conditional blocks inside resources. However, this feature is currently
-[being implemented][6] and should be released shortly.
+Now, when you push to `master`, or create a pull request, CodeBuild will
+automatically build the commit and report the status back to GitHub. A status
+badge can be added to your project's README using the `codebuild_badge_url` and
+`codebuild_url` outputs printed to the terminal.
+
+**Note**: the OAuth-token is currently mandatory (also for public repositories),
+because Terraform doesn't support conditional blocks inside resources. However,
+this feature is currently [being implemented][6] and should be released shortly.
+If you want to omit it, create your own CodeBuild project [see below][6].
 
   [6]: https://github.com/hashicorp/terraform/issues/7034
 

@@ -76,7 +76,7 @@ badge can be added to your project's README using the `codebuild_badge_url` and
 **Note**: the OAuth-token is currently mandatory (also for public repositories),
 because Terraform doesn't support conditional blocks inside resources. However,
 this feature is currently [being implemented][6] and should be released shortly.
-If you want to omit it, create your own CodeBuild project [see below][6].
+If you want to omit it, create your own CodeBuild project [see below][7].
 
   [6]: https://github.com/hashicorp/terraform/issues/7034
 
@@ -115,12 +115,12 @@ The following variables can be configured:
 
 #### `codebuild_project`
 
-- **Description**: CodeBuild project name (won't create [default project][6])
+- **Description**: CodeBuild project name (won't create [default project][7])
 - **Default**: `""`
 - **Conflicts with**: `codebuild_compute_type`, `codebuild_image`,
   `codebuild_buildspec`
 
-  [6]: #default-project
+  [7]: #default-project
 
 #### `codebuild_compute_type`
 
@@ -220,9 +220,9 @@ This module first integrated with AWS CodePipeline but switched to CodeBuild,
 because the former is heavily opinionated in terms of configuration and much,
 much slower. For this reason, the deployment of your build artifacts must be
 handled by another module which can be triggered when the build artifacts are
-written to S3, most likely by [using a Lambda function][7].
+written to S3, most likely by [using a Lambda function][8].
 
-  [7]: http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
+  [8]: http://docs.aws.amazon.com/lambda/latest/dg/with-s3-example.html
 
 ## License
 

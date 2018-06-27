@@ -132,9 +132,10 @@ resource "aws_codebuild_project" "_" {
   }
 
   environment {
-    compute_type = "${var.codebuild_compute_type}"
-    type         = "LINUX_CONTAINER"
-    image        = "${var.codebuild_image}"
+    compute_type    = "${var.codebuild_compute_type}"
+    type            = "LINUX_CONTAINER"
+    image           = "${var.codebuild_image}"
+    privileged_mode = "${var.codebuild_privileged_mode}"
   }
 
   artifacts {

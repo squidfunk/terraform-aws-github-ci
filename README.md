@@ -140,6 +140,12 @@ The following variables can be configured:
 - **Default**: `"buildspec.yml"` (at repository root)
 - **Conflicts with**: `codebuild_project`
 
+### `codebuild_privileged_mode`
+
+- **Description**: If set to true, enables running the Docker daemon inside a Docker container.
+- **Default**: false
+- **Conflicts with**: `codebuild_project`
+
 #### `codebuild_bucket`
 
 - **Description**: S3 bucket to store status badge and artifacts

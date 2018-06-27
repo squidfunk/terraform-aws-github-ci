@@ -80,6 +80,12 @@ variable "codebuild_buildspec" {
   default     = ""
 }
 
+# var.codebuild_privileged_mode
+variable "codebuild_privileged_mode" {
+  description = "Enables running the Docker daemon inside a Docker container"
+  default     = "false"
+}
+
 # var.codebuild_bucket
 variable "codebuild_bucket" {
   description = "S3 bucket to store status badge and artifacts"

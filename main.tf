@@ -96,7 +96,7 @@ resource "aws_s3_bucket" "_" {
 resource "aws_s3_bucket_object" "_" {
   bucket        = "${aws_s3_bucket._.bucket}"
   key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/share/assets/unknown.svg"
+  source        = "${path.module}/share/badges/unknown.svg"
   acl           = "public-read"
   cache_control = "no-cache, no-store, must-revalidate"
   content_type  = "image/svg+xml"

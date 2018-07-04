@@ -54,7 +54,7 @@ Next, add the following module to your Terraform configuration and apply it:
 ``` hcl
 module "github_ci" {
   source  = "github.com/squidfunk/terraform-aws-github-ci"
-  version = "0.5.2"
+  version = "0.5.3"
 
   namespace          = "<namespace>"
   github_owner       = "<owner>"
@@ -140,10 +140,11 @@ The following variables can be configured:
 - **Default**: `"buildspec.yml"` (at repository root)
 - **Conflicts with**: `codebuild_project`
 
-### `codebuild_privileged_mode`
+#### `codebuild_privileged_mode`
 
-- **Description**: If set to true, enables running the Docker daemon inside a Docker container.
-- **Default**: false
+- **Description**: If set to true, enables running the Docker daemon inside a
+                   Docker container.
+- **Default**: `false`
 - **Conflicts with**: `codebuild_project`
 
 #### `codebuild_bucket`

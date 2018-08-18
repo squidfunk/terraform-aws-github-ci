@@ -1,3 +1,11 @@
+terraform-aws-github-ci-0.5.4 (2018-08-18)
+
+  * Fixed GitHub webhook creation by temporarily downgrading provider to < 1
+
+terraform-aws-github-ci-0.5.3 (2018-06-04)
+
+  * Added support for privileged mode
+
 terraform-aws-github-ci-0.5.2 (2018-05-16)
 
   * Fixed indeterministic environment variable mapping

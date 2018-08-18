@@ -19,6 +19,7 @@
 # IN THE SOFTWARE.
 
 provider "github" {
+  version      = "< 1.0.0"
   organization = "${var.github_owner}"
   token        = "${var.github_oauth_token}"
 }

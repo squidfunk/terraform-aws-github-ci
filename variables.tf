@@ -91,3 +91,10 @@ variable "codebuild_bucket" {
   description = "S3 bucket to store status badge and artifacts"
   default     = ""
 }
+
+# var.codebuild_environment_variables
+variable "codebuild_environment_variables" {
+  description = "CodeBuild Environment Variables"
+  default     = []
+  type        = "list"
+}

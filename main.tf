@@ -92,21 +92,6 @@ resource "aws_s3_bucket" "_" {
   acl    = "private"
 }
 
-# aws_s3_bucket_object._
-resource "aws_s3_bucket_object" "_" {
-  bucket        = "${aws_s3_bucket._.bucket}"
-  key           = "${var.github_repository}/status.svg"
-  source        = "${path.module}/share/badges/unknown.svg"
-  acl           = "public-read"
-  cache_control = "no-cache, no-store, must-revalidate"
-  content_type  = "image/svg+xml"
-
-  # Ignore, if there already is a status
-  lifecycle {
-    ignore_changes = ["*"]
-  }
-}
-
 # -----------------------------------------------------------------------------
 # Resources: CodeBuild
 # -----------------------------------------------------------------------------
@@ -119,6 +104,7 @@ resource "aws_codebuild_project" "_" {
 
   build_timeout = "5"
   service_role  = "${aws_iam_role.codebuild.arn}"
+  badge_enabled = "${var.codebuild_badge_enabled}"
 
   source {
     type      = "GITHUB"

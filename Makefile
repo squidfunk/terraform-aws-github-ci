@@ -18,8 +18,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-all: lint | build
-
 # -----------------------------------------------------------------------------
 # Targets
 # -----------------------------------------------------------------------------
@@ -34,26 +32,3 @@ all: lint | build
 
 # Initialize repository
 init: .git/hooks/pre-commit
-
-# -----------------------------------------------------------------------------
-
-# Build distribution files
-build:
-	make -C modules/status/lambda build
-	make -C modules/webhook/lambda build
-
-# Clean distribution files
-clean:
-	make -C modules/status/lambda clean
-	make -C modules/webhook/lambda clean
-
-# Lint source files
-lint:
-	make -C modules/status/lambda lint
-	make -C modules/webhook/lambda lint
-
-# -----------------------------------------------------------------------------
-
-# Special targets
-.PHONY: .FORCE build lint
-.FORCE:

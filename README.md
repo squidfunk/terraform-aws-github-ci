@@ -23,8 +23,7 @@ request and build status support using AWS CodeBuild.
 This module registers a GitHub webhook which is triggered for `push` and
 `pull_request` events and starts the build for the respective branch. All
 builds run in parallel. The build progress and status for a respective commit
-is reported back to GitHub. Furthermore, a badge for the status of `master` is
-generated and hosted on S3.
+is reported back to GitHub.
 
 ### Cost
 
@@ -54,7 +53,7 @@ Next, add the following module to your Terraform configuration and apply it:
 ``` hcl
 module "github_ci" {
   source  = "github.com/squidfunk/terraform-aws-github-ci"
-  version = "0.5.4"
+  version = "0.6.0"
 
   namespace          = "<namespace>"
   github_owner       = "<owner>"

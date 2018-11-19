@@ -146,33 +146,3 @@ resource "aws_codebuild_project" "_" {
     packaging      = "ZIP"
   }
 }
-
-# -----------------------------------------------------------------------------
-# Modules
-# -----------------------------------------------------------------------------
-
-# module.status
-module "status" {
-  source = "./modules/status"
-
-  namespace = "${var.namespace}"
-
-  github_owner       = "${var.github_owner}"
-  github_repository  = "${var.github_repository}"
-  github_oauth_token = "${var.github_oauth_token}"
-  github_reporter    = "${var.github_reporter}"
-
-  bucket = "${aws_s3_bucket._.bucket}"
-}
-
-# module.webhook
-module "webhook" {
-  source = "./modules/webhook"
-
-  namespace = "${var.namespace}"
-
-  github_owner       = "${var.github_owner}"
-  github_repository  = "${var.github_repository}"
-  github_oauth_token = "${var.github_oauth_token}"
-  github_reporter    = "${var.github_reporter}"
-}

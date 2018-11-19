@@ -132,3 +132,11 @@ resource "aws_codebuild_project" "_" {
     packaging      = "ZIP"
   }
 }
+
+# -----------------------------------------------------------------------------
+# Resources: CodeBuild Webhook
+# -----------------------------------------------------------------------------
+
+resource "aws_codebuild_webhook" "_" {
+  project_name = "${aws_codebuild_project._.name}"
+}

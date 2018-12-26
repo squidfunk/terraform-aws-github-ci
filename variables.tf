@@ -92,6 +92,13 @@ variable "codebuild_bucket" {
   default     = ""
 }
 
+# var.codebuild_environment_variables
+variable "codebuild_environment_variables" {
+  description = "Environment variables to be used for build"
+  default     = []
+  type        = "list"
+  }
+
 # var.codebuild_badge_enabled
 variable "codebuild_badge_enabled" {
   description = "Generates a publicly-accessible URL for the projects build badge"

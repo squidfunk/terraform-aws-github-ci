@@ -98,8 +98,6 @@ resource "aws_s3_bucket" "_" {
 
 # aws_codebuild_project._
 resource "aws_codebuild_project" "_" {
-  count = "${length(var.codebuild_project) == 0 ? 1 : 0}"
-
   name = "${var.github_repository}"
 
   build_timeout = "5"

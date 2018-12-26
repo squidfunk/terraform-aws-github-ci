@@ -46,21 +46,9 @@ variable "github_oauth_token" {
   description = "GitHub OAuth token for repository access"
 }
 
-# var.github_reporter
-variable "github_reporter" {
-  description = "GitHub commit status reporter"
-  default     = "AWS CodeBuild"
-}
-
 # -----------------------------------------------------------------------------
 # Variables: CodeBuild
 # -----------------------------------------------------------------------------
-
-# var.codebuild_project
-variable "codebuild_project" {
-  description = "CodeBuild project name (won't create default project)"
-  default     = ""
-}
 
 # var.codebuild_compute_type
 variable "codebuild_compute_type" {

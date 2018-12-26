@@ -9,30 +9,14 @@
   [github-image]: https://img.shields.io/github/release/squidfunk/terraform-aws-github-ci.svg
   [github-link]: https://github.com/squidfunk/terraform-aws-github-ci/releases
 
-# Terraform AWS GitHub CI
+# Terraform AWS GitHub CI <small style="color: #f44336">DEPRECATED</small>
+
+> This project has been deprecated, as AWS CodeBuild now natively supports
+> automatic builds on new commits and reports status back to GitHub. However,
+> it may serve as a template for anyone trying to get AWS CodeBuild working.
 
 A Terraform module to setup a serverless GitHub CI build environment with pull
 request and build status support using AWS CodeBuild.
-
-## Architecture
-
-![Architecture][1]
-
-  [1]: assets/architecture.png
-
-This module registers a GitHub webhook which is triggered for `push` and
-`pull_request` events and starts the build for the respective branch. All
-builds run in parallel. The build progress and status for a respective commit
-is reported back to GitHub.
-
-### Cost
-
-Building with this CI server is unbelievably cheap - you only pay what you use.
-Pricings starts at **$ 0,005 per build minute**, and AWS CodeBuild offers 100
-free build minutes every month. The price for the other services (Lambda, SNS,
-S3 and CloudWatch) are negligible and should only add a few cents to your
-monthly bill. Compare that to the $ 69 that services like Travis cost every
-month, regardless of how much you use them.
 
 ## Usage
 
@@ -53,7 +37,7 @@ Next, add the following module to your Terraform configuration and apply it:
 ``` hcl
 module "github_ci" {
   source  = "github.com/squidfunk/terraform-aws-github-ci"
-  version = "0.6.0"
+  version = "1.0.0"
 
   namespace          = "<namespace>"
   github_owner       = "<owner>"
@@ -107,49 +91,37 @@ The following variables can be configured:
 
 ### Optional
 
-#### `github_reporter`
-
-- **Description**: GitHub commit status reporter
-- **Default**: `"AWS CodeBuild"`
-
-#### `codebuild_project`
-
-- **Description**: CodeBuild project name (won't create [default project][7])
-- **Default**: `""`
-- **Conflicts with**: `codebuild_compute_type`, `codebuild_image`,
-  `codebuild_buildspec`
-
-  [7]: #default-project
-
 #### `codebuild_compute_type`
 
 - **Description**: Compute resources used by the build
 - **Default**: `"BUILD_GENERAL1_SMALL"`
-- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_image`
 
 - **Description**: Base image for provisioning (AWS Registry, Docker)
 - **Default**: `"aws/codebuild/ubuntu-base:14.04"`
-- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_buildspec`
 
 - **Description**: Build specification file location ([file format][2])
 - **Default**: `"buildspec.yml"` (at repository root)
-- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_privileged_mode`
 
 - **Description**: If set to true, enables running the Docker daemon inside a
                    Docker container.
 - **Default**: `false`
-- **Conflicts with**: `codebuild_project`
 
 #### `codebuild_bucket`
 
 - **Description**: S3 bucket to store status badge and artifacts
 - **Default**: `"${var.namespace}"` (equal to namespace)
+
+#### `codebuild_badge_enabled`
+
+- **Description**: Generates a publicly-accessible URL for the projects build
+                   badge
+- **Default**: `true`
 
 ### Outputs
 
@@ -174,51 +146,6 @@ The following outputs are exported:
 #### `codebuild_url`
 
 - **Description**: CodeBuild project URL
-
-### Default project
-
-If you need more control over the CodeBuild project, you can pass the name of
-an external CodeBuild project in this variable. This will avoid the creation
-of the default project which has the following configuration:
-
-``` hcl
-resource "aws_codebuild_project" "codebuild" {
-  name = "${var.github_repository}"
-
-  build_timeout = "5"
-  service_role  = "${aws_iam_role.codebuild.arn}"
-
-  source {
-    type     = "GITHUB"
-    location = "https://github.com/$${owner}/$${repository}.git"
-
-    auth {
-      type     = "OAUTH"
-      resource = "${var.github_oauth_token}"
-    }
-  }
-
-  environment {
-    compute_type = "${var.codebuild_compute_type}"
-    type         = "LINUX_CONTAINER"
-    image        = "${var.codebuild_image}"
-  }
-
-  artifacts {
-    type           = "S3"
-    location       = "${var.codebuild_bucket}"
-    name           = "${var.github_repository}"
-    namespace_type = "BUILD_ID"
-    packaging      = "ZIP"
-  }
-}
-```
-
-The corresponding service role and the bucket are always created and exported
-as `codebuild_service_role_arn`, `codebuild_service_role_name` and
-`codebuild_bucket`. You can reference them in your CodeBuild resource
-definition, e.g. to attach further policies, and thus avoid the creation of
-your own service role and bucket.
 
 ## Limitations
 

@@ -39,7 +39,11 @@ output "codebuild_bucket" {
 
 # output.codebuild_badge_url
 output "codebuild_badge_url" {
-  value = "${var.codebuild_badge_enabled == "true" ? aws_codebuild_project._.*.badge_url[0] : ""}"
+  value = "${
+    var.codebuild_badge_enabled == "true"
+      ? aws_codebuild_project._.*.badge_url[0]
+      : ""
+  }"
 }
 
 # output.codebuild_url

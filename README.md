@@ -117,6 +117,11 @@ The following variables can be configured:
 - **Description**: S3 bucket to store status badge and artifacts
 - **Default**: `"${var.namespace}"` (equal to namespace)
 
+#### `codebuild_environment_variables`
+
+- **Description**: CodeBuild environment variables
+- **Default**: []
+
 #### `codebuild_badge_enabled`
 
 - **Description**: Generates a publicly-accessible URL for the projects build

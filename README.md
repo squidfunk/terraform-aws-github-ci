@@ -11,7 +11,7 @@
   [github-image]: https://img.shields.io/github/release/squidfunk/terraform-aws-github-ci.svg
   [github-link]: https://github.com/squidfunk/terraform-aws-github-ci/releases
 
-# [DEPRECATED] Terraform AWS GitHub CI
+# Terraform AWS GitHub CI
 
 > This project has been deprecated, as AWS CodeBuild now natively supports
 > automatic builds on new commits and reports status back to GitHub. However,

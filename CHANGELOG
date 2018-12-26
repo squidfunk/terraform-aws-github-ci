@@ -1,3 +1,9 @@
+terraform-aws-github-ci-1.0.0 (2018-12-26)
+
+  * Added support for CodeBuild environment variables
+  * Removed custom Lambda functions in favor of native CodeBuild functionality
+  * Officially deprecated the project - this should be the last release
+
 terraform-aws-github-ci-0.5.4 (2018-08-18)
 
   * Fixed GitHub webhook creation by temporarily downgrading provider to < 1

@@ -39,11 +39,7 @@ output "codebuild_bucket" {
 
 # output.codebuild_badge_url
 output "codebuild_badge_url" {
-  value = "https://s3.amazonaws.com/${
-    aws_s3_bucket._.bucket
-  }/${
-    var.github_repository
-  }/status.svg"
+  value = "${var.codebuild_badge_enabled == "true" ? aws_codebuild_project._.*.badge_url[0] : ""}"
 }
 
 # output.codebuild_url

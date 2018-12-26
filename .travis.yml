@@ -28,18 +28,6 @@ node_js: 8
 git:
   depth: 5
 
-# Cache dependencies
-cache:
-  directories:
-    - modules/status/lambda/node_modules
-    - modules/webhook/lambda/node_modules
-
-# Install dependencies
-install:
-  - npm install --prefix modules/status/lambda
-  - npm install --prefix modules/webhook/lambda
-
-# Perform build and release
+# Build script
 script:
-  - make lint
-  - make build
+  - terraform fmt -check -diff

@@ -91,3 +91,9 @@ variable "codebuild_bucket" {
   description = "S3 bucket to store status badge and artifacts"
   default     = ""
 }
+
+# var.codebuild_badge_enabled
+variable "codebuild_badge_enabled" {
+  description = "Generates a publicly-accessible URL for the projects build badge"
+  default     = "true"
+}

@@ -133,10 +133,7 @@ resource "aws_codebuild_project" "_" {
   }
 }
 
-# -----------------------------------------------------------------------------
-# Resources: CodeBuild Webhook
-# -----------------------------------------------------------------------------
-
+# aws_codebuild_webhook._
 resource "aws_codebuild_webhook" "_" {
   project_name = "${aws_codebuild_project._.name}"
 }

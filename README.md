@@ -1,11 +1,8 @@
 ![Status][status-image]
-[![Travis][travis-image]][travis-link]
 [![Gitter][gitter-image]][gitter-link]
 [![GitHub][github-image]][github-link]
 
   [status-image]: https://img.shields.io/badge/status-deprecated-red.svg
-  [travis-image]: https://travis-ci.org/squidfunk/terraform-aws-github-ci.svg?branch=master
-  [travis-link]: https://travis-ci.org/squidfunk/terraform-aws-github-ci
   [gitter-image]: https://badges.gitter.im/squidfunk/terraform-aws-github-ci.svg
   [gitter-link]: https://gitter.im/squidfunk/terraform-aws-github-ci
   [github-image]: https://img.shields.io/github/release/squidfunk/terraform-aws-github-ci.svg

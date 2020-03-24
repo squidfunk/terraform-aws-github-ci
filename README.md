@@ -1,12 +1,6 @@
 ![Status][status-image]
-[![Gitter][gitter-image]][gitter-link]
-[![GitHub][github-image]][github-link]
 
   [status-image]: https://img.shields.io/badge/status-deprecated-red.svg
-  [gitter-image]: https://badges.gitter.im/squidfunk/terraform-aws-github-ci.svg
-  [gitter-link]: https://gitter.im/squidfunk/terraform-aws-github-ci
-  [github-image]: https://img.shields.io/github/release/squidfunk/terraform-aws-github-ci.svg
-  [github-link]: https://github.com/squidfunk/terraform-aws-github-ci/releases
 
 # Terraform AWS GitHub CI
 
